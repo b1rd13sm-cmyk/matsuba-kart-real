@@ -44,7 +44,7 @@ def apply_survey(buildings, records, roads, route, path):
             if f.get('kind') not in ('window','door','sign','fence','parking','plant') or any(not isinstance(f.get(k),(float,int)) or not math.isfinite(f[k]) for k in ('x','y','z','width','height','depth')) or not 0<min(f['width'],f['height'],f['depth']) or max(f['width'],f['height'],f['depth'])>100:raise ValueError('Invalid feature')
         quality=e.get('quality',{})
         if (quality.get('status')=='reviewed' or any(quality.get(k) in ('matched','approximate') for k in ('position','shape','color'))) and (not quality.get('reference',{}).get('source') or not quality.get('note') or quality.get('reference',{}).get('type')=='test'):raise ValueError('Verified survey needs reference and review note')
-        b.update(p=[[round(x,2),round(y,2)] for x,y in list(p.exterior.coords)[:-1]],holes=[[[round(x,2),round(y,2)] for x,y in list(h.coords)[:-1]] for h in p.interiors],centroid=[round(p.centroid.x,2),round(p.centroid.y,2)],features=features,survey=quality,appearanceEstimated=True,heightMeasured=False)
+        b.update(p=[[round(x,2),round(y,2)] for x,y in list(p.exterior.coords)[:-1]],holes=[[[round(x,2),round(y,2)] for x,y in list(h.coords)[:-1]] for h in p.interiors],centroid=[round(p.centroid.x,2),round(p.centroid.y,2)],features=features,survey=quality,appearanceEstimated=True,heightMeasured=False,area=round(p.area,2),routeDistance=round(p.distance(line),2))
         b['roofRise']=0 if b['roofShape']=='flat' else min(b['roofRise'] or 1.2,b['height']*.3);b['eaveHeight']=b['height']-b['roofRise'];b['heightSource']='developer-survey-estimate';b['evidence']['developerReview']=quality
     all_polygons={**originals,**edited}
     for ident,p in edited.items():
