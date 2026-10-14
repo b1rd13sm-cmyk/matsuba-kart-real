@@ -1,23 +1,139 @@
-# 八幡学区 REAL
+# 位置・形状の精度更新（2026-10-14）
 
-The original hand-traced course remains the default option and its code and assets remain available. The REAL selection loads a separate OSM-derived data file and `real-scene3d.mjs` renderer. The shared race engine handles kart controls, physics, three laps, items, bots, and minimap in both.
+最新の仕様・修正根拠は [BUILDING_ACCURACY_REPORT.md](BUILDING_ACCURACY_REPORT.md) を参照。
+ID由来の外観変化と物理看板・仮の車位置は廃止し、east/up/southへの共通写像、
+WGS84原点縮尺、公式要覧に基づく校舎モデル、全高／軒高の分離を導入しました。
+以下は最初のREAL一本化時の記録で、変更箇所は上記報告を優先してください。
 
-## Provenance
+# マツバカート：八幡学区 REAL
 
-- School: 近江八幡市立八幡中学校, 滋賀県近江八幡市市井町36 (school's official site). OSM way `437104331` defines the grounds.
-- OpenStreetMap API 0.6 extract, bbox `136.080,35.126,136.112,35.146`, retrieved 2026-10-13. © OpenStreetMap contributors, ODbL 1.0.
-- `dist/data/hachiman-osm.xml.gz` contains the raw extract; `dist/data/real-hachiman.json` contains the derived database with source IDs and estimated-value flags. These files are available for download from the Site. Rebuild with `python scripts/generate_real_course.py SOURCE.xml`.
-- Coordinates use a local equirectangular approximation in metres around `(35.13838, 136.09886)`.
+## 一本化と維持した機能
 
-## Route and assumptions
+標準・唯一のコースは八幡学区 REAL。コース選択、従来ルート、従来の3D描画器、
+ハリボテ画像素材、架空の町並み生成を削除しました。クエリなし、`?course=real`、
+旧リンクの `?course=legacy` はすべて同じREALを起動します。
 
-- The 3,842 m closed loop follows OSM highway nodes from the school frontage, north-west turn, historic district, southern road and back to the school. Six OSM anchor nodes and shortest connected highway paths yield a simple cycle with no repeated vertex.
-- Track centreline uses OSM node geometry. Resampling at 6 m intervals and spline smoothing alters the line by small amounts for kart handling. The playable strip is widened to 8.8 m even where the mapped road is narrower; roadside pavements and collision boundaries are game adjustments. Access and traffic rules were not assessed.
-- 187 nearby OSM road ways, 749 building footprints, 27 waterways and 57 land parcels are incorporated. Building heights, mapped road widths, and elevation measurements were unavailable in this extract. Heights, widths, 3D architectural details, car placements, fences, utility poles and wires are inferred or illustrative. OSM outlines, school footprint and road/waterway paths are map-derived.
-- One named school sign and a small set of actual OSM-named shops have procedural signs. Exterior details are not claimed to match each real building.
+既存の操作、加減速・慣性、7台のCPU、3周、順位、逆走、5種類のアイテム、
+1/4・3/4地点のアイテム取得、カウントダウン、完走・再走、ミニマップを維持。
+通信対戦サーバーは追加していません。
 
-## Verification status
+## 建物が少なかった原因
 
-- Node syntax checks, scene construction without WebGL, route closure, mesh finite-vertex checks and original-course load checks passed.
-- Direct browser rendering on iPad or Chromebook, 30 fps measurements, visual comparison on those devices, and 36-player network testing are not available in this development environment. The existing owner-private Sites build is a local-bot game with no multiplayer server; the REAL option does not add networking.
-- The REAL scene avoids long wire connections between unrelated poles and uses frustum culling and instanced repeating details. The old course renderer is retained.
+旧OSM抽出（136.080,35.126,136.112,35.146）には1,486個のbuilding wayがありましたが、
+生成処理はコースから150 m未満の749棟だけを採用していました。relationで構成される
+建物は対象外でした。さらに、3Dの遠方クリップは455 m、霧の終端は440 mでした。
+749棟に対する描画数上限やランダム間引きはなく、64 m制限は窓等の細部だけでした。
+近距離の不足には、OSM自体の建物未登録も含まれていました。
+
+## 地理データ・変更前後
+
+| 項目 | 変更前 | 変更後 |
+|---|---:|---:|
+| 建物 | 749 | 8,557 |
+| OSM由来建物 | 749 | 1,175 |
+| 国土地理院由来の補完建物 | 0 | 7,382 |
+| 架空・密度補完用建物 | 0 | 0 |
+| コースからの建物収録距離 | 150 m | 650 m |
+| 周辺道路 | 187 | 689 |
+| カメラ遠方クリップ | 455 m | 760 m |
+
+- OSM API 0.6、bbox **136.076,35.122,136.119,35.151**、取得日2026-10-14（日本時間）。
+  © OpenStreetMap contributors、ODbL 1.0。
+- **国土地理院ベクトルタイル提供実験**、`experimental_bvmap`、zoom 16の42タイル。
+  取得日2026-10-14、提供者READMEの更新情報は2026-07-01。
+  建物Polygon/MultiPolygonだけを使用し、輪郭線を架空ポリゴンへ変換していません。
+- 学校敷地はOSM way `437104331`（近江八幡市立八幡中学校、市井町36）。
+- 局所座標は北緯35.13838、東経136.09886を原点とするメートル単位の等距円筒近似。
+- 従来REALの73個のOSM道路ノード・675点の経路・公称3,842 mを
+  `dist/data/course-route.json` に固定。新しい地図取得で走行経路を変更しません。
+  ノードの欠落・位置変更は生成時にエラーとし、手動レビューを要求します。
+
+### 国土地理院の利用条件
+
+提供実験READMEに記載された国土地理院コンテンツ利用規約に従います。
+現在の規約は公共データ利用規約PDL 1.0で、出典と加工の明示が必要です。
+タイトル画面とデータREADMEに「国土地理院ベクトルタイル提供実験を加工」と記載。
+提供実験READMEでは、このタイルは基本測量成果と位置付けられていない旨が明記されています。
+
+- https://github.com/gsi-cyberjapan/gsimaps-vector-experiment
+- https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html
+- https://www.openstreetmap.org/copyright
+
+## 位置・重複・道路の整合性
+
+OSM multipolygonの外周・中庭を扱い、relationのmember wayを二重生成しません。
+国土地理院のタイル境界で切れた同一建物を接合し、重複輪郭を除外します。
+OSMと国土地理院が重なる場合はOSMを優先。輪郭が少しずれる候補も保守的に除外し、
+`statistics.overlapRejected` に残します。性能目的の近距離削除ではありません。
+
+全採用建物には `source`、`sourceIds`、`footprintReal: true`、`synthetic: false` を記録。
+高さ、屋根、外観については別に推定フラグを持ちます。建物の位置・向きを移動せず、
+外形の座標はセンチメートル単位に丸めるだけです。
+
+実在外形を保つため、推定幅の道路面・歩道・白線から建物外形＋12 cmを差し引きます。
+描画道路と実在外形の交差面積は0 m²、走行中心線との交差も0件です。
+道路描画には走行判定と同じ640点のCatmull-Rom経路を使い、旧来の約0.41 mの
+折れ線／判定線のずれを解消しました。
+
+広げた路肩が実在外壁へ入り込む136個のサンプルでは、建物から1.15 m離れるよう
+プレイヤーの境界とCPUの横位置を制限。速度・操作・周回経路は変更していません。
+推定の一律8.8 m幅を現地の実測道幅とは扱いません。
+
+## 3D品質と最適化
+
+全建物は地図外形に沿う立体壁・屋根です。中庭は屋根で埋めません。
+用途タグを優先し、不明な用途・高さ・屋根は面積等から推定します。
+一戸建ては切妻を基本に、学校・商業施設・集合住宅等は異なる高さや窓配列を用います。
+四角形でない複雑な外形も、棟線で屋根の三角形を分割して傾斜屋根にします。
+外形を四角い家へ置き換えません。
+窓枠・窓・玄関・ひさし・バルコニーは形状を共有したInstancedMesh。
+色は控えめな外壁・瓦等のパレットで、地物IDに由来する安定した変化を付けています。
+外観が現地写真と一致するという主張はしていません。
+
+- 128 m単位の258エリア。各エリアの建物シェルは頂点色で1描画へ統合。
+- 近景は屋根形状付き、遠景は同じ実在外形・高さの簡略立体。建物そのものは消しません。
+- エリア境界から260 m以内で詳細屋根、110 m以内で窓等の細部を描画。
+- 実際のカメラ視錐台でエリアを抑制。760 mより遠いエリアは描画しません。
+- 近いエリアを優先し、1フレーム最大2エリアだけ形状を生成。再訪時はキャッシュ再利用。
+- 壁・屋根の材質、細部のBoxGeometryを共有。高負荷な動的シャドウは使いません。
+- 電線はLineSegments、チェックポイントはInstancedMeshへまとめました。
+- 8台のカートは色付きInstancedMeshを共有し、車体等を計4描画へまとめました。
+- ピクセル比は最大1.25。初期地図JSは約5 MB（圧縮前）。元のタイルは実行時に取得しません。
+- WebGL不可の場合も、同じ実在建物データを使うCanvasの立体壁・屋根へ戻ります。
+
+## 再生成
+
+```sh
+python -m pip install -r scripts/requirements-geo.txt
+python scripts/fetch_gsi_buildings.py
+python scripts/generate_real_course.py dist/data/hachiman-osm.xml.gz
+```
+
+OSM取得URLは `dist/data/README.txt` を参照。元OSMと元GSIタイルを保存しているため、
+再生成時に外部サービスへアクセスする必要はありません。元データを更新するときは、
+取得日時・提供者更新情報も更新し、地理検証を実行してください。
+
+## 検証
+
+```sh
+PYTHONPATH=/workspace/geo-deps python tests/verify_geography.py
+node tests/verify_buildings.mjs
+node tests/verify_race.mjs
+# distでHTTPサーバーを起動し、Chromium/Playwrightがある環境で:
+python tests/verify_browser.py
+```
+
+地理検証は建物増加・出典・実在フラグ・OSM座標保持・重複・中庭・道路との交差・
+走行経路保持を確認。形状検証は全棟について近景/遠景の立体形状と有限頂点を確認。
+レース検証は起動、カウントダウン、加速・旋回・バック、全5アイテム、2か所の取得、
+順走/逆走の周回、3周完走、再走を確認します。
+
+ブラウザー検証はChromiumのChromebook/iPad相当画面と縦画面で実施。
+実機iPadのSafariや実機Chromebookでの速度保証ではありません。
+
+## 残る不足
+
+両データに存在しない建物は追加しません。これは「空白＝現地にも建物なし」の証明ではありません。
+提供データの更新時期、タイル境界・OSMとの照合で除外した候補、建物用途の未登録に限界があります。
+高さ・階数・屋根・窓・玄関・色・電柱・フェンスの大半は未測量。
+標高は未導入で、平坦なコースです。学校門や白雲館等の固有の外観は今後の写真照合対象です。

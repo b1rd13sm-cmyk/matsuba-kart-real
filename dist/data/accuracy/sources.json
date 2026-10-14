@@ -1,0 +1,25 @@
+{
+  "reviewDate": "2026-10-14",
+  "aerial": {
+    "provider": "国土地理院 全国最新写真（シームレス）",
+    "url": "https://maps.gsi.go.jp/#17/35.13838/136.09886/&base=seamlessphoto",
+    "terms": "https://maps.gsi.go.jp/help/termsofuse.html",
+    "captureDate": null,
+    "captureDateVerified": false,
+    "note": "Visual footprint comparison, not a survey; imagery mosaic dates can differ."
+  },
+  "schoolGuide": {
+    "url": "https://www.fureai-cloud.jp/hachiman-jh/home/index/annai/yoran",
+    "documentTitle": "令和8年度 学校要覧",
+    "observations": [
+      "Address 市井町36",
+      "Visible courtyard-facing classroom wing has three window rows",
+      "Visible classroom wing has a pitched blue-grey roof and warm light walls"
+    ],
+    "limitations": [
+      "Other wings and exact heights are not measured",
+      "RGB colors and window dimensions are estimates",
+      "No school photo is republished as a texture"
+    ]
+  }
+}
