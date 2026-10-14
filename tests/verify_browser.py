@@ -29,7 +29,7 @@ with sync_playwright() as p:
   for selector in ['#gas','#stick','#item']:
    b=page.locator(selector).bounding_box();assert b['x']>=0 and b['y']>=0 and b['x']+b['width']<=width+1 and b['y']+b['height']<=height+1,(name,selector,b)
   page.screenshot(path=str(OUT/(name+'-race.png')))
-  frame=page.evaluate('''async()=>{const times=[];let last=performance.now();for(let i=0;i<45;i++)await new Promise(resolve=>requestAnimationFrame(t=>{times.push(t-last);last=t;resolve()}));times.sort((a,b)=>a-b);return {medianFrameMs:times[22],p95FrameMs:times[42]}}''')
+  frame=page.evaluate('''async()=>{const times=[];let last=performance.now();for(let i=0;i<12;i++)await new Promise(resolve=>requestAnimationFrame(t=>{times.push(t-last);last=t;resolve()}));times.sort((a,b)=>a-b);return {medianFrameMs:times[6],p95FrameMs:times[11]}}''')
   stats=page.evaluate('window.kartSceneStats');assert stats['totalBuildings']>749;assert stats['visibleBuildings']>0
   assert not errors and not failed,(errors,failed)
   results.append({'viewport':name,'size':[width,height],'touchControls':touch,'query':query,'speed':speed,'stats':stats,'frames':frame,'errors':errors,'failedResources':failed})

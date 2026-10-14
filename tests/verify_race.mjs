@@ -20,7 +20,7 @@ assert.equal(window.kartSceneData.track.length,640);
 assert.ok(!html.includes('legacyChoice')&&!html.includes("import('./scene3d.mjs')"));
 race.start();assert.equal(race.phase(),'countdown');clock+=3001;step();assert.equal(race.phase(),'racing');
 race.keys.KeyW=true;step(160);assert.ok(race.me.s>19);assert.ok(Math.hypot(race.me.x-map.route[0][0],race.me.y-map.route[0][1])>10);
-const heading=race.me.h;race.keys.KeyD=true;step(24);race.keys.KeyD=false;assert.ok(Math.abs(race.me.h-heading)>.1);
+const heading=race.me.h;race.keys.KeyD=true;step(24);race.keys.KeyD=false;assert.ok(race.me.h-heading<-.1,'Right input rotates clockwise in geographic east/north coordinates');
 race.keys.KeyW=false;race.keys.KeyS=true;step(160);race.keys.KeyS=false;assert.ok(race.me.s<0);
 // Start/reset clears momentum and item state exactly as the effective old engine did.
 race.start();clock+=3001;step();assert.equal(race.me.s,0);assert.equal(race.me.item,null);

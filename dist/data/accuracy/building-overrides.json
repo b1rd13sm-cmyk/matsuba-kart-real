@@ -1,0 +1,19 @@
+{
+  "gsi/38549eb19a63f49c": {
+    "expectedCentroid": [
+      -53.7,
+      26.32
+    ],
+    "expectedArea": 4335.65,
+    "type": "school",
+    "style": "institution",
+    "name": "近江八幡市立八幡中学校 校舎",
+    "levels": 3,
+    "levelsSource": "school-guide-visible-wing; whole-complex estimate",
+    "roofShape": "gabled",
+    "wallColor": "#e1d9bf",
+    "roofColor": "#687e8f",
+    "reviewSource": "https://www.fureai-cloud.jp/hachiman-jh/home/index/annai/yoran",
+    "reviewNote": "Aerial confirms courtyard outline visually; school-guide photo guides only visible wing. Other wings, dimensions and total height remain estimated."
+  }
+}

@@ -45,6 +45,15 @@ class Geography(unittest.TestCase):
   self.assertFalse(buildings.intersects(centre))
   for name,polys in self.data['roadSurfaces'].items():
    surface=unary_union([Polygon(p['p'],p['holes']) for p in polys]);self.assertLess(surface.intersection(buildings).area,.001,name)
+ def test_evidence_and_school_review(self):
+  school=next(b for b in self.b if b['id']=='gsi/38549eb19a63f49c')
+  self.assertEqual(school['type'],'school');self.assertEqual(school['levels'],3)
+  self.assertEqual(school['roofShape'],'gabled');self.assertFalse(school['heightMeasured'])
+  self.assertEqual(school['heightSource'],'photo-guided-estimate')
+  for b in self.b:
+   self.assertIn('entrance',b['evidence']);self.assertLessEqual(b['eaveHeight'],b['height'])
+   self.assertAlmostEqual(b['eaveHeight']+b['roofRise'],b['height'],places=2)
+   self.assertGreaterEqual(b['frontEdge'],0);self.assertLess(b['frontEdge'],len(b['p']))
  def test_coverage_and_boundaries(self):
   self.assertEqual(self.data['coverage']['buildingRadiusMeters'],650)
   self.assertEqual(len(self.data['boundaryLimits']),640)

@@ -1,9 +1,11 @@
 import * as THREE from './vendor/three.module.js';
+import {createGeoFrame} from './geo-frame.mjs';
 import {prepareBuildingTiles,buildBuildingTile} from './buildings3d.mjs';
 
 // This scene uses only the OSM-derived, build-time data file. Game physics,
 // standings, item timing and minimap remain in the original race engine.
 const map=window.REAL_HACHIMAN, race=window.kartSceneData;
+const frame=createGeoFrame(map.origin.lat);
 if(!map||!race)throw new Error('REAL course data unavailable');
 const canvas=document.createElement('canvas');
 canvas.className='gamecanvas';canvas.style.zIndex='0';
@@ -16,14 +18,15 @@ try {
   renderer.toneMappingExposure=1.05;
   const scene=new THREE.Scene();scene.background=new THREE.Color('#b8d6e6');
   scene.fog=new THREE.Fog('#c6d7d8',240,740);
+  const world=new THREE.Group();world.scale.set(frame.eastScale,1,-frame.northScale);scene.add(world);
   const camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.65,760);
-  const ambient=new THREE.HemisphereLight('#e8f3ff','#938f7e',1.5);scene.add(ambient);
-  const sun=new THREE.DirectionalLight('#ffeed2',1.15);sun.position.set(-95,190,80);scene.add(sun);
+  const ambient=new THREE.HemisphereLight('#e8f3ff','#938f7e',1.5);world.add(ambient);
+  const sun=new THREE.DirectionalLight('#ffeed2',1.15);sun.position.set(-95,190,80);world.add(sun);
   const material=(color,roughness=1)=>new THREE.MeshLambertMaterial({color,side:THREE.DoubleSide});
   const asphalt=material('#646966',.98),roadSecondary=material('#777b77',.98);
   const edge=material('#e4e4da'),center=material('#e9e8dc');
   const ground=new THREE.Mesh(new THREE.PlaneGeometry(4300,3600),material('#8c9b77'));
-  ground.rotation.x=-Math.PI/2;ground.position.y=-.13;scene.add(ground);
+  ground.rotation.x=-Math.PI/2;ground.position.y=-.13;world.add(ground);
 
   function strip(points,width,y,mat,closed=false){
     const vertices=[],uv=[],indices=[];let along=0;
@@ -37,7 +40,7 @@ try {
     }
     const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
     geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(indices);geo.computeVertexNormals();
-    const mesh=new THREE.Mesh(geo,mat);scene.add(mesh);return mesh;
+    const mesh=new THREE.Mesh(geo,mat);world.add(mesh);return mesh;
   }
   function polygon(points,y,mat,holes=[]){
     if(points.length<3)return;
@@ -46,7 +49,7 @@ try {
     for(const tri of THREE.ShapeUtils.triangulateShape(contour,inner))for(const i of tri)pos.push(all[i][0],y,all[i][1]);
     if(!pos.length)return;
     const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.computeVertexNormals();
-    const mesh=new THREE.Mesh(geo,mat);scene.add(mesh);return mesh;
+    const mesh=new THREE.Mesh(geo,mat);world.add(mesh);return mesh;
   }
   function surface(polygons,y,mat){
     const groups=new Map();
@@ -56,7 +59,7 @@ try {
       for(const tri of THREE.ShapeUtils.triangulateShape(poly.p.map(p=>new THREE.Vector2(...p)),poly.holes.map(r=>r.map(p=>new THREE.Vector2(...p)))))for(const i of tri)pos.push(all[i][0],y,all[i][1]);
     }
     for(const pos of groups.values()){
-      const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.computeVertexNormals();scene.add(new THREE.Mesh(geo,mat));
+      const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.computeVertexNormals();world.add(new THREE.Mesh(geo,mat));
     }
   }
   const soil=material('#8f805c'),field=material('#9cae73'),grass=material('#849b69'),schoolLand=material('#a4a591');
@@ -80,7 +83,7 @@ try {
       dashes.setMatrixAt(index++,dashTransform.matrix);nextDash+=17;
     }sum+=len;
   }
-  dashes.count=index;dashes.instanceMatrix.needsUpdate=true;scene.add(dashes);
+  dashes.count=index;dashes.instanceMatrix.needsUpdate=true;world.add(dashes);
 
   // One colored solid mesh per 128 m tile at each shell LOD, shared materials.
   // No building count limit. Geometry is built lazily and retained for revisits.
@@ -89,7 +92,7 @@ try {
   const detailMaterials={frame:material('#e7e2d5'),glass:material('#526c76'),door:material('#766b58'),balcony:material('#a4a89e'),canopy:material('#737c78')};
   const buildingTiles=prepareBuildingTiles(map.buildings);
   for(const tile of buildingTiles){const [x0,z0,x1,z1]=tile.bounds;
-    tile.sphere=new THREE.Sphere(new THREE.Vector3((x0+x1)/2,tile.height/2,(z0+z1)/2),Math.hypot((x1-x0)/2,(z1-z0)/2,tile.height/2));
+    tile.sphere=new THREE.Sphere(new THREE.Vector3(...frame.worldPoint((x0+x1)/2,(z0+z1)/2,tile.height/2)),Math.hypot((x1-x0)*frame.eastScale/2,(z1-z0)*frame.northScale/2,tile.height/2));
   }
   const frustum=new THREE.Frustum(),projection=new THREE.Matrix4();
   const stats={totalBuildings:map.buildings.length,loadedTiles:0,visibleBuildings:0,visibleTiles:0,detailTiles:0,calls:0,triangles:0,frameMs:0};
@@ -111,35 +114,19 @@ try {
     pending.sort((a,b)=>a.distance-b.distance);
     for(const {tile} of pending.slice(0,2)){
       tile.meshes=buildBuildingTile(THREE,tile,shellMaterial,sharedBox,detailMaterials,map.renderRoute);
-      tile.meshes.group.visible=false;scene.add(tile.meshes.group);stats.loadedTiles++;
+      tile.meshes.group.visible=false;world.add(tile.meshes.group);stats.loadedTiles++;
     }
   }
-  const namedBuildings=map.buildings.filter(b=>b.name&&b.routeDistance<55&&['ローソン','白雲館','ガスト','滋賀銀行','近江兄弟社','千成亭','長五郎せんべい','八幡コミュニティセンター事務所棟'].includes(b.name));
+  const namedBuildings=map.buildings.filter(b=>b.name&&b.routeDistance<100);
+  let nextLabel=0;
+  function updatePlaceLabel(me){if(performance.now()<nextLabel)return;nextLabel=performance.now()+300;let closest=null,distance=60;for(const b of namedBuildings){let d=Infinity;for(let i=0;i<b.p.length;i++){const a=b.p[i],q=b.p[(i+1)%b.p.length],dx=q[0]-a[0],dy=q[1]-a[1],u=Math.max(0,Math.min(1,((me.x-a[0])*dx+(me.y-a[1])*dy)/(dx*dx+dy*dy||1)));d=Math.min(d,Math.hypot(me.x-a[0]-dx*u,me.y-a[1]-dy*u))}if(d<distance){distance=d;closest=b}}document.querySelector('#district').textContent='八幡学区 REAL'+(closest?' · '+closest.name.replace('近江八幡市立',''):'')}
   function raceDistance(p){let best=Infinity;for(let i=0;i<map.route.length;i+=4){const q=map.route[i];best=Math.min(best,Math.hypot(p[0]-q[0],p[1]-q[1]))}return best}
   function placement(out,x,y,z,wide,high,deep,rotation){out.push({x,y,z,wide,high,deep,rotation})}
   function instances(items,mat){if(!items.length)return;
     const mesh=new THREE.InstancedMesh(sharedBox,mat,items.length),o=new THREE.Object3D();
     items.forEach((d,i)=>{o.position.set(d.x,d.y,d.z);o.rotation.set(0,d.rotation,0);o.scale.set(d.wide,d.high,d.deep);o.updateMatrix();mesh.setMatrixAt(i,o.matrix)});
-    mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();scene.add(mesh);
+    mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();world.add(mesh);
   }
-  const parked=[];
-  for(const lot of map.landuse.filter(p=>p.type==='parking')){
-    if(lot.p.length<3)continue;const x=lot.p.reduce((s,p)=>s+p[0],0)/lot.p.length,z=lot.p.reduce((s,p)=>s+p[1],0)/lot.p.length;
-    if(raceDistance([x,z])<80&&Number(lot.id)%3===0)placement(parked,x,.62,z,1.6,1.1,3.1,Number(lot.id)%6*.15);
-  }
-  instances(parked,material('#aeb4b2',.54));
-  for(const b of namedBuildings){
-    let best=null;
-    for(let i=0;i<b.p.length;i++){const a=b.p[i],d=b.p[(i+1)%b.p.length],p=[(a[0]+d[0])/2,(a[1]+d[1])/2],n=raceDistance(p);
-      if(!best||n<best.distance)best={p,angle:-Math.atan2(d[1]-a[1],d[0]-a[0]),distance:n}}
-    const c=document.createElement('canvas');c.width=768;c.height=150;const x=c.getContext('2d');
-    x.fillStyle=b.name==='ローソン'?'#1756a3':'#f1ebd9';x.fillRect(0,0,768,150);
-    x.fillStyle=b.name==='ローソン'?'#fff':'#3d4443';x.font='bold 85px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(b.name,384,75,736);
-    const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;
-    const m=new THREE.Mesh(new THREE.PlaneGeometry(Math.min(9,Math.max(4,b.name.length*.9)),1.2),new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide}));
-    m.position.set(best.p[0],Math.min(b.height-1.2,3.5),best.p[1]);m.rotation.y=best.angle;scene.add(m);
-  }
-
   // School grounds are sourced from OSM. The fence and its sign are illustrative.
   const fencePost=[],fenceRail=[];
   for(let i=0;i<map.schoolGround.length;i++){
@@ -151,15 +138,6 @@ try {
     placement(fenceRail,(a[0]+b[0])/2,.55,(a[1]+b[1])/2,d,.055,.08,angle);
   }
   instances(fencePost,material('#6f7e7b'));instances(fenceRail,material('#6f7e7b'));
-  const signCanvas=document.createElement('canvas');signCanvas.width=1024;signCanvas.height=160;
-  const cx=signCanvas.getContext('2d');cx.fillStyle='#e8e4d9';cx.fillRect(0,0,1024,160);
-  cx.fillStyle='#263940';cx.font='bold 100px sans-serif';cx.textAlign='center';cx.fillText('近江八幡市立八幡中学校',512,110);
-  const signTex=new THREE.CanvasTexture(signCanvas);signTex.colorSpace=THREE.SRGBColorSpace;
-  const sign=new THREE.Mesh(new THREE.PlaneGeometry(12,1.9),new THREE.MeshBasicMaterial({map:signTex,side:THREE.DoubleSide}));
-  const entrance=map.schoolGround.reduce((best,p)=>raceDistance(p)<raceDistance(best)?p:best,map.schoolGround[0]||[0,0]);
-  const closest=race.track.reduce((best,p)=>Math.hypot(p.x-entrance[0],p.y-entrance[1])<Math.hypot(best.x-entrance[0],best.y-entrance[1])?p:best,race.track[0]);
-  sign.position.set(entrance[0],2.3,entrance[1]);sign.rotation.y=-Math.atan2(closest.ty,closest.tx);scene.add(sign);
-
   // Local wires span consecutive poles only. There are no connections across
   // unrelated road sections, which previously caused long diagonal sky lines.
   const poleMat=material('#737b7a'),wireMat=new THREE.LineBasicMaterial({color:'#52595a',transparent:true,opacity:.65});
@@ -172,7 +150,7 @@ try {
   }
   const poles=new THREE.InstancedMesh(new THREE.CylinderGeometry(.11,.16,9.2,6),poleMat,polePositions.length),poleObj=new THREE.Object3D();
   polePositions.forEach((p,i)=>{poleObj.position.set(p[0],4.6,p[1]);poleObj.rotation.set(0,0,0);poleObj.scale.set(1,1,1);poleObj.updateMatrix();poles.setMatrixAt(i,poleObj.matrix)});
-  poles.instanceMatrix.needsUpdate=true;scene.add(poles);
+  poles.instanceMatrix.needsUpdate=true;world.add(poles);
   const wireVertices=[];
   for(let i=1;i<polePositions.length;i++){
     const a=polePositions[i-1],b=polePositions[i];if(Math.hypot(a[0]-b[0],a[1]-b[1])>70)continue;
@@ -180,7 +158,7 @@ try {
       const m=[(a[0]+b[0])/2,h-.35,(a[1]+b[1])/2];wireVertices.push(a[0],h,a[1],...m,...m,b[0],h,b[1]);
     }
   }
-  const wireGeometry=new THREE.BufferGeometry();wireGeometry.setAttribute('position',new THREE.Float32BufferAttribute(wireVertices,3));scene.add(new THREE.LineSegments(wireGeometry,wireMat));
+  const wireGeometry=new THREE.BufferGeometry();wireGeometry.setAttribute('position',new THREE.Float32BufferAttribute(wireVertices,3));world.add(new THREE.LineSegments(wireGeometry,wireMat));
 
 
   const checkColors=[material('#f5f5ed'),material('#28343c'),material('#f4da50'),material('#e75684')];
@@ -193,7 +171,7 @@ try {
     }
   }
   const checkGeometry=new THREE.PlaneGeometry(.48,8.8/12),checkObj=new THREE.Object3D();
-  checks.forEach((list,i)=>{const mesh=new THREE.InstancedMesh(checkGeometry,checkColors[i],list.length);list.forEach((p,j)=>{checkObj.position.set(p.x,.09,p.z);checkObj.rotation.set(-Math.PI/2,0,-p.h);checkObj.updateMatrix();mesh.setMatrixAt(j,checkObj.matrix)});mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();scene.add(mesh)});
+  checks.forEach((list,i)=>{const mesh=new THREE.InstancedMesh(checkGeometry,checkColors[i],list.length);list.forEach((p,j)=>{checkObj.position.set(p.x,.09,p.z);checkObj.rotation.set(-Math.PI/2,0,-p.h);checkObj.updateMatrix();mesh.setMatrixAt(j,checkObj.matrix)});mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();world.add(mesh)});
 
   // Eight karts share four draw calls; their colors are instance attributes.
   const kartParts=[
@@ -202,7 +180,7 @@ try {
     {g:new THREE.BoxGeometry(.31,.48,.56),mat:material('#242a2d'),offsets:[[-.93,.33,-.73],[-.93,.33,.73],[.93,.33,-.73],[.93,.33,.73]]},
     {g:new THREE.BoxGeometry(1.8,.13,.37),mat:material('#28333c'),offsets:[[0,1.2,-.96]]}
   ];
-  for(const part of kartParts){part.mesh=new THREE.InstancedMesh(part.g,part.mat,(race.bots.length+1)*part.offsets.length);part.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);part.mesh.frustumCulled=false;scene.add(part.mesh)}
+  for(const part of kartParts){part.mesh=new THREE.InstancedMesh(part.g,part.mat,(race.bots.length+1)*part.offsets.length);part.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);part.mesh.frustumCulled=false;world.add(part.mesh)}
   const kartTransform=new THREE.Object3D(),kartColor=new THREE.Color();
   function updateKarts(me){const cars=[me,...race.bots];
     for(const part of kartParts){let index=0;
@@ -215,8 +193,8 @@ try {
   addEventListener('resize',resize);resize();
   window.renderKartScene=(me)=>{
     const fx=Math.cos(me.camera),fz=Math.sin(me.camera);
-    camera.position.set(me.x-fx*5.5,3.65,me.y-fz*5.5);camera.lookAt(me.x+fx*22,1.4,me.y+fz*22);
-    updateKarts(me);
+    camera.position.set(...frame.worldPoint(me.x-fx*5.5,me.y-fz*5.5,3.65));camera.lookAt(...frame.worldPoint(me.x+fx*22,me.y+fz*22,1.4));
+    updateKarts(me);updatePlaceLabel(me);
     const started=performance.now();updateBuildings();renderer.render(scene,camera);stats.calls=renderer.info.render.calls;stats.triangles=renderer.info.render.triangles;stats.frameMs=performance.now()-started;
   };
 } catch(error){console.warn('REAL 3D unavailable; using the 2D course renderer.',error);canvas.remove()}

@@ -37,6 +37,7 @@ def main():
     raw=args.source.read_bytes()
     if args.source.suffix=='.gz':raw=gzip.decompress(raw)
     osm=ET.fromstring(raw)
+    poi_records=[(n.get('id'),{t.get('k'):t.get('v') for t in n.findall('tag')},float(n.get('lon')),float(n.get('lat'))) for n in osm.findall('node') if any(t.get('k') in ('shop','amenity') for t in n.findall('tag'))]
     nodes={n.get('id'):((float(n.get('lon'))-lon)*mlon,(float(n.get('lat'))-lat)*111320) for n in osm.findall('node')}
     if not all(n in nodes for n in circuit['routeOSMNodeIds']):raise RuntimeError('OSM extract is missing preserved circuit nodes')
     for n in circuit['routeOSMNodeIds']:
@@ -130,6 +131,11 @@ def main():
             overlap_rejected.append(rec[0]);continue
         kept_indices.add(i);final.append(rec)
     records=sorted(final,key=lambda rec:rec[0]);osm_count=sum(rec[3]=='osm' for rec in records)
+    footprint_tree=STRtree([rec[1] for rec in records]);poi_by_building=collections.defaultdict(list)
+    for node_id,t,lng,latitude in poi_records:
+        point=Point((lng-lon)*mlon,(latitude-lat)*111320)
+        for index in footprint_tree.query(point,predicate='within'):
+            poi_by_building[int(index)].append({'nodeId':node_id,'tags':t})
     footprint_union=unary_union([rec[1] for rec in records]);occupied=footprint_union.buffer(.12,join_style=2)
     roads=[];water=[];land=[];school_ground=[]
     for ident,(ids,t) in ways.items():
@@ -144,9 +150,22 @@ def main():
         if (t.get('landuse') in ('farmland','meadow','grass','forest','residential','orchard') or t.get('natural') in ('wood','water') or t.get('amenity')=='parking') and len(ids)>=4 and ids[0]==ids[-1]:
             for p in valid(pts):
                 if p.distance(route_line)<RADIUS:land.append({'id':ident,**geometry(p),'type':'parking' if t.get('amenity')=='parking' else t.get('landuse',t.get('natural'))})
+    road_tree=STRtree([LineString(road['p']) for road in roads])
     buildings=[]
-    for ident,p,t,source,refs in records:
+    overrides=json.loads((ROOT/'dist/data/accuracy/building-overrides.json').read_text())
+    school_polygon=Polygon(school_ground)
+    for record_index,(ident,p,t,source,refs) in enumerate(records):
+        pois=poi_by_building.get(record_index,[])
+        shop_pois=[poi for poi in pois if poi['tags'].get('shop') and poi['tags']['shop']!='vacant']
+        t=dict(t)
+        if t.get('building')=='yes' and len(shop_pois)==1:
+            t['shop']=shop_pois[0]['tags']['shop']
+            if not t.get('name'):t['name']=shop_pois[0]['tags'].get('name','')
         seed=int(hashlib.sha256(ident.encode()).hexdigest()[:8],16);kind=t.get('building','yes');area=p.area
+        override=overrides.get(ident,{})
+        if override and (Point(override['expectedCentroid']).distance(p.centroid)>1 or abs(area-override['expectedArea'])>1):raise RuntimeError('Reviewed footprint changed: '+ident)
+        on_school_site=school_polygon.covers(p.representative_point())
+        kind=override.get('type',kind)
         if kind=='yes' and t.get('amenity')=='school':kind='school'
         if kind=='yes' and t.get('shop'):kind='retail'
         if kind in ('apartments','dormitory','terrace'):style='apartments'
@@ -155,15 +174,24 @@ def main():
         elif kind in ('garage','garages','shed','roof') or area<28:style='outbuilding'
         elif kind in ('house','detached','residential') or area<240:style='house'
         else:style='large-unknown'
-        height=number(t.get('height'));measured=height is not None and height>0;levels=number(t.get('building:levels'))
-        if not measured:height=levels*2.9+.8 if levels and levels>0 else {'house':5.7,'apartments':10.5,'institution':9.8,'commercial':7.1,'outbuilding':2.8,'large-unknown':7.6}[style]+(seed%5)*.32
-        roof=t.get('roof:shape')
-        if roof not in ('gabled','hipped','flat','pyramidal'):roof='gabled' if style=='house' else 'hipped' if style=='outbuilding' and seed%3==0 else 'flat'
+        style=override.get('style',style)
+        height=number(t.get('height'));measured=height is not None and height>0;levels=override.get('levels') or number(t.get('building:levels'))
+        if not measured:height=levels*2.9+.8 if levels and levels>0 else {'house':7.2,'apartments':10.5,'institution':11.2,'commercial':7.1,'outbuilding':2.8,'large-unknown':7.6}[style]
+        roof=override.get('roofShape') or t.get('roof:shape')
+        if roof not in ('gabled','hipped','flat','pyramidal'):roof='gabled' if style=='house' else 'gabled' if style=='outbuilding' else 'flat'
+        roof_rise=number(t.get('roof:height'))
+        if roof_rise is None:roof_rise=1.2 if roof!='flat' else 0
+        roof_rise=min(max(0,roof_rise),height*.3)
+        level_count=levels or {'house':2,'apartments':3,'institution':3,'commercial':2,'outbuilding':1,'large-unknown':2}[style]
         buildings.append({'id':ident,**geometry(p),'height':round(height,2),'heightMeasured':measured,
-            'heightSource':'height-tag' if measured else 'levels-tag' if levels else 'estimated','type':kind,'style':style,
-            'name':t.get('name',''),'source':source,'sourceIds':refs,'footprintReal':True,'synthetic':False,
-            'roofShape':roof,'roofShapeEstimated':'roof:shape' not in t,'wallColor':t.get('building:colour') or t.get('building:color'),
-            'roofColor':t.get('roof:colour') or t.get('roof:color'),'appearanceEstimated':True,'seed':seed,
+            'heightSource':'height-tag' if measured else 'photo-guided-estimate' if override else 'levels-tag' if levels else 'estimated','frontEdge':min(range(len(p.exterior.coords)-1),key=lambda i:LineString(roads[int(road_tree.nearest(Point([(p.exterior.coords[i][k]+p.exterior.coords[i+1][k])/2 for k in (0,1)])))]['p']).distance(Point([(p.exterior.coords[i][k]+p.exterior.coords[i+1][k])/2 for k in (0,1)]))),
+            'eaveHeight':round(height-roof_rise,2),'roofRise':round(roof_rise,2),'levels':level_count,
+            'siteUse':'school' if on_school_site else None,'useSource':'school-guide-and-mapped-site' if override else 'osm-poi-inside-footprint' if len(shop_pois)==1 else 'osm-tag' if kind!='yes' else 'area-inferred',
+            'evidence':{'footprint':'source-polygon; visual-aerial-review' if override else 'source-polygon-not-surveyed','height':'estimate' if not measured else 'osm-height-tag-not-independently-measured','levels':override.get('levelsSource','osm-levels-tag' if levels else 'use-based-estimate'),'roof':override.get('reviewNote','osm-roof-tag' if 'roof:shape' in t else 'use-based-estimate'),'appearance':'photo-guided-estimate' if override else 'use-based-estimate','windows':'procedural-estimate','entrance':'unverified'},
+            'mappedPOIs':pois,'type':kind,'style':style,
+            'name':override.get('name',t.get('name','')),'source':source,'sourceIds':refs,'footprintReal':True,'synthetic':False,
+            'roofShape':roof,'roofShapeEstimated':'roof:shape' not in t,'wallColor':override.get('wallColor') or t.get('building:colour') or t.get('building:color'),
+            'roofColor':override.get('roofColor') or t.get('roof:colour') or t.get('roof:color'),'appearanceEstimated':True,'seed':seed,
             'area':round(area,2),'routeDistance':round(p.distance(route_line),2),'centroid':[round(p.centroid.x,2),round(p.centroid.y,2)]})
     surfaces={}
     secondary=unary_union([LineString(road['p']).buffer(road['width']/2,join_style=2) for road in roads])
@@ -192,14 +220,14 @@ def main():
     bounds=osm.find('bounds');bbox=[float(bounds.get(k)) for k in ('minlon','minlat','maxlon','maxlat')]
     data={**circuit,'name':'八幡学区 REAL','license':'ODbL 1.0 (OSM); PDL 1.0 (GSI)',
         'source':'OpenStreetMap contributors + 国土地理院ベクトルタイル提供実験','sourceDate':'2026-10-14',
-        'bbox':bbox,'projection':'local equirectangular metres','renderRoute':[[round(v,4) for v in p] for p in render_route],
+        'bbox':bbox,'projection':'local equirectangular metres','renderAxes':'east/up/south; map north is negative world z; WGS84 origin scale correction','accuracySources':'accuracy/sources.json','renderRoute':[[round(v,4) for v in p] for p in render_route],
         'boundaryLimits':limits,'roads':roads,'buildings':buildings,'waterways':water,'landuse':land,'schoolGround':school_ground,
         'roadSurfaces':surfaces,'coverage':{'buildingRadiusMeters':RADIUS,'roadRadiusMeters':RADIUS,'cameraFarMeters':760,'detailDistanceMeters':110,'tileSizeMeters':128},
         'sources':[{'id':'osm','name':'OpenStreetMap contributors','license':'ODbL 1.0','url':'https://www.openstreetmap.org/copyright','bbox':bbox},
                    {'id':'gsi','name':manifest['source'],'license':'PDL 1.0','url':manifest['terms'],'tileManifest':'gsi-tiles/manifest.json','dataRevision':manifest['dataRevision'],'processed':True}],
         'statistics':{'previousBuildings':749,'osmBuildings':osm_count,'gsiBuildings':len(buildings)-osm_count,'gsiDuplicateMatches':duplicates,
             'syntheticBuildings':0,'overlapRejected':overlap_rejected,'invalidOSMWays':invalid,'centrelineConflicts':conflicts,'narrowBoundarySamples':sum(min(p)<5.15 for p in limits)},
-        'assumptions':{'raceRoadWidthMeters':8.8,'buildingHeightWithoutTags':'estimated by mapped use, footprint area and stable variation',
+        'assumptions':{'raceRoadWidthMeters':8.8,'buildingHeightWithoutTags':'estimated by mapped use and footprint area; no ID-based jitter',
             'roadsWithoutWidthTag':'estimated by highway class; visible surfaces yield to actual building polygons',
             'elevation':'not available; planar road mesh','landmarkExteriors':'procedural, not surveyed','missingFootprints':'no synthetic infill; unmapped areas remain empty'}}
     out=ROOT/'dist/data';serialized=json.dumps(data,ensure_ascii=False,separators=(',',':'),allow_nan=False)
