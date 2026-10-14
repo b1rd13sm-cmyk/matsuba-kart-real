@@ -1,0 +1,267 @@
+{
+  "zoom": 16,
+  "bbox": [
+    136.08021181595208,
+    35.12498761767876,
+    136.11074210557143,
+    35.148635479698164
+  ],
+  "sourceDate": "2026-10-14",
+  "source": "国土地理院ベクトルタイル提供実験",
+  "dataRevision": "2026-07-01 (provider README)",
+  "terms": "https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html",
+  "tiles": [
+    {
+      "x": 57540,
+      "y": 25925,
+      "path": "16-57540-25925.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57540/25925.pbf"
+    },
+    {
+      "x": 57540,
+      "y": 25926,
+      "path": "16-57540-25926.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57540/25926.pbf"
+    },
+    {
+      "x": 57540,
+      "y": 25927,
+      "path": "16-57540-25927.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57540/25927.pbf"
+    },
+    {
+      "x": 57540,
+      "y": 25928,
+      "path": "16-57540-25928.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57540/25928.pbf"
+    },
+    {
+      "x": 57540,
+      "y": 25929,
+      "path": "16-57540-25929.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57540/25929.pbf"
+    },
+    {
+      "x": 57540,
+      "y": 25930,
+      "path": "16-57540-25930.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57540/25930.pbf"
+    },
+    {
+      "x": 57541,
+      "y": 25925,
+      "path": "16-57541-25925.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57541/25925.pbf"
+    },
+    {
+      "x": 57541,
+      "y": 25926,
+      "path": "16-57541-25926.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57541/25926.pbf"
+    },
+    {
+      "x": 57541,
+      "y": 25927,
+      "path": "16-57541-25927.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57541/25927.pbf"
+    },
+    {
+      "x": 57541,
+      "y": 25928,
+      "path": "16-57541-25928.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57541/25928.pbf"
+    },
+    {
+      "x": 57541,
+      "y": 25929,
+      "path": "16-57541-25929.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57541/25929.pbf"
+    },
+    {
+      "x": 57541,
+      "y": 25930,
+      "path": "16-57541-25930.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57541/25930.pbf"
+    },
+    {
+      "x": 57542,
+      "y": 25925,
+      "path": "16-57542-25925.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57542/25925.pbf"
+    },
+    {
+      "x": 57542,
+      "y": 25926,
+      "path": "16-57542-25926.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57542/25926.pbf"
+    },
+    {
+      "x": 57542,
+      "y": 25927,
+      "path": "16-57542-25927.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57542/25927.pbf"
+    },
+    {
+      "x": 57542,
+      "y": 25928,
+      "path": "16-57542-25928.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57542/25928.pbf"
+    },
+    {
+      "x": 57542,
+      "y": 25929,
+      "path": "16-57542-25929.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57542/25929.pbf"
+    },
+    {
+      "x": 57542,
+      "y": 25930,
+      "path": "16-57542-25930.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57542/25930.pbf"
+    },
+    {
+      "x": 57543,
+      "y": 25925,
+      "path": "16-57543-25925.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57543/25925.pbf"
+    },
+    {
+      "x": 57543,
+      "y": 25926,
+      "path": "16-57543-25926.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57543/25926.pbf"
+    },
+    {
+      "x": 57543,
+      "y": 25927,
+      "path": "16-57543-25927.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57543/25927.pbf"
+    },
+    {
+      "x": 57543,
+      "y": 25928,
+      "path": "16-57543-25928.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57543/25928.pbf"
+    },
+    {
+      "x": 57543,
+      "y": 25929,
+      "path": "16-57543-25929.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57543/25929.pbf"
+    },
+    {
+      "x": 57543,
+      "y": 25930,
+      "path": "16-57543-25930.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57543/25930.pbf"
+    },
+    {
+      "x": 57544,
+      "y": 25925,
+      "path": "16-57544-25925.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57544/25925.pbf"
+    },
+    {
+      "x": 57544,
+      "y": 25926,
+      "path": "16-57544-25926.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57544/25926.pbf"
+    },
+    {
+      "x": 57544,
+      "y": 25927,
+      "path": "16-57544-25927.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57544/25927.pbf"
+    },
+    {
+      "x": 57544,
+      "y": 25928,
+      "path": "16-57544-25928.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57544/25928.pbf"
+    },
+    {
+      "x": 57544,
+      "y": 25929,
+      "path": "16-57544-25929.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57544/25929.pbf"
+    },
+    {
+      "x": 57544,
+      "y": 25930,
+      "path": "16-57544-25930.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57544/25930.pbf"
+    },
+    {
+      "x": 57545,
+      "y": 25925,
+      "path": "16-57545-25925.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57545/25925.pbf"
+    },
+    {
+      "x": 57545,
+      "y": 25926,
+      "path": "16-57545-25926.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57545/25926.pbf"
+    },
+    {
+      "x": 57545,
+      "y": 25927,
+      "path": "16-57545-25927.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57545/25927.pbf"
+    },
+    {
+      "x": 57545,
+      "y": 25928,
+      "path": "16-57545-25928.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57545/25928.pbf"
+    },
+    {
+      "x": 57545,
+      "y": 25929,
+      "path": "16-57545-25929.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57545/25929.pbf"
+    },
+    {
+      "x": 57545,
+      "y": 25930,
+      "path": "16-57545-25930.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57545/25930.pbf"
+    },
+    {
+      "x": 57546,
+      "y": 25925,
+      "path": "16-57546-25925.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57546/25925.pbf"
+    },
+    {
+      "x": 57546,
+      "y": 25926,
+      "path": "16-57546-25926.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57546/25926.pbf"
+    },
+    {
+      "x": 57546,
+      "y": 25927,
+      "path": "16-57546-25927.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57546/25927.pbf"
+    },
+    {
+      "x": 57546,
+      "y": 25928,
+      "path": "16-57546-25928.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57546/25928.pbf"
+    },
+    {
+      "x": 57546,
+      "y": 25929,
+      "path": "16-57546-25929.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57546/25929.pbf"
+    },
+    {
+      "x": 57546,
+      "y": 25930,
+      "path": "16-57546-25930.pbf",
+      "url": "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/16/57546/25930.pbf"
+    }
+  ]
+}
