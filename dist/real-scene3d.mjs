@@ -20,8 +20,8 @@ try {
   scene.fog=new THREE.Fog('#c6d7d8',240,740);
   const world=new THREE.Group();world.scale.set(frame.eastScale,1,-frame.northScale);scene.add(world);
   const camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.65,760);
-  const ambient=new THREE.HemisphereLight('#e8f3ff','#938f7e',1.5);world.add(ambient);
-  const sun=new THREE.DirectionalLight('#ffeed2',1.15);sun.position.set(-95,190,80);world.add(sun);
+  const ambient=new THREE.HemisphereLight('#edf4fa','#a2a9af',1.5);world.add(ambient);
+  const sun=new THREE.DirectionalLight('#ffffff',1.15);sun.position.set(-95,190,80);world.add(sun);
   const material=(color,roughness=1)=>new THREE.MeshLambertMaterial({color,side:THREE.DoubleSide});
   const asphalt=material('#646966',.98),roadSecondary=material('#777b77',.98);
   const edge=material('#e4e4da'),center=material('#e9e8dc');
@@ -89,7 +89,7 @@ try {
   // No building count limit. Geometry is built lazily and retained for revisits.
   const shellMaterial=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});
   const sharedBox=new THREE.BoxGeometry(1,1,1);
-  const detailMaterials={frame:material('#e7e2d5'),glass:material('#526c76'),door:material('#766b58'),balcony:material('#a4a89e'),canopy:material('#737c78')};
+  const detailMaterials={frame:material('#dfe3e5'),glass:material('#526c76'),door:material('#596165'),balcony:material('#a4a89e'),canopy:material('#737c78')};
   const buildingTiles=prepareBuildingTiles(map.buildings);
   for(const tile of buildingTiles){const [x0,z0,x1,z1]=tile.bounds;
     tile.sphere=new THREE.Sphere(new THREE.Vector3(...frame.worldPoint((x0+x1)/2,(z0+z1)/2,tile.height/2)),Math.hypot((x1-x0)*frame.eastScale/2,(z1-z0)*frame.northScale/2,tile.height/2));

@@ -1,3 +1,4 @@
+import './building-colors.js';
 // Actual map footprints keep their orientation and courtyard holes at every LOD.
 // Only heights, facade fittings and untagged roof/material choices are estimated.
 export function prepareBuildingTiles(buildings, size=128) {
@@ -10,8 +11,6 @@ export function prepareBuildingTiles(buildings, size=128) {
   }
   return [...tiles.values()];
 }
-const wallPalette=['#d8d1c1','#c8c5bb','#ddd9ce','#b4bdb8','#cebda5','#e0ded5','#b4aca0'];
-const roofPalette=['#4c565a','#665750','#66706f','#424b52'];
 function simplifyRing(points){
   return points.filter((b,i)=>{const a=points[(i-1+points.length)%points.length],c=points[(i+1)%points.length];return Math.abs((b[0]-a[0])*(c[1]-b[1])-(b[1]-a[1])*(c[0]-b[0]))>.03});
 }
@@ -25,8 +24,7 @@ export function buildBuildingTile(THREE,tile,sharedMaterial,boxGeometry,detailMa
   function routeDistance(p){let best=Infinity;for(let i=0;i<route.length;i+=4){const q=route[i];best=Math.min(best,Math.hypot(p[0]-q[0],p[1]-q[1]))}return best}
   for(const b of tile.buildings){
     const h=b.eaveHeight??b.height,pts=b.p;
-    const wall=b.wallColor||({house:'#d8d1c1',apartments:'#ddd9ce',institution:'#e1ded5',commercial:'#c8c5bb',outbuilding:'#b4aca0','large-unknown':'#d3cec0'}[b.style]||wallPalette[0]);
-    const roof=b.roofColor||(b.roofShape==='flat'?roofPalette[2]:roofPalette[0]);
+    const {wall,roof}=globalThis.KART_BUILDING_COLORS.resolve(b);
     let front=null;
     for(const [ri,ring] of [pts,...b.holes].entries()){
       const orientation=Math.sign(signedArea(ring))||1;

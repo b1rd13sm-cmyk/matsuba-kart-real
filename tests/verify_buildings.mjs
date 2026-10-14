@@ -20,3 +20,16 @@ for(const tile of tiles){
 }
 assert.equal(total,map.buildings.length);
 console.log(JSON.stringify({buildingsWithSolidNearAndFarGeometry:total,tiles:tiles.length,detailInstances,triangles}));
+// Explicit colors must survive both shell LODs; unknown exteriors share the
+// neutral fallback with Canvas and the survey color pickers.
+const explicit={id:'color-regression',style:'house',wallColor:'#dd3322',roofColor:'#2266dd',p:[[0,0],[10,0],[10,10],[0,10]],holes:[],centroid:[5,5],height:6,eaveHeight:6,roofRise:0,roofShape:'flat',routeDistance:200};
+const sample=buildBuildingTile(THREE,prepareBuildingTiles([explicit])[0],mat,box,materials,map.renderRoute);
+for(const mesh of [sample.near,sample.far])for(const hex of [explicit.wallColor,explicit.roofColor]){
+ const expected=new THREE.Color(hex),cs=mesh.geometry.getAttribute('color').array;let found=false;
+ for(let i=0;i<cs.length;i+=3)if(Math.abs(cs[i]-expected.r)<1e-6&&Math.abs(cs[i+1]-expected.g)<1e-6&&Math.abs(cs[i+2]-expected.b)<1e-6){found=true;break}
+ assert.ok(found,'Mapped wall/roof color lost at shell LOD');
+}
+assert.equal(globalThis.KART_BUILDING_COLORS.resolve({style:'house'}).wall,'#eceeeb');
+assert.equal(globalThis.KART_BUILDING_COLORS.resolve({style:'commercial'}).wall,'#d7dcdf');
+for(const b of map.buildings){const c=globalThis.KART_BUILDING_COLORS.resolve(b);if(b.wallColor)assert.equal(c.wall,b.wallColor);if(b.roofColor)assert.equal(c.roof,b.roofColor)}
+console.log('PASS: neutral unknown defaults; explicit colors preserved for all buildings and both shell LODs.');
