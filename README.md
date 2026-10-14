@@ -5,3 +5,5 @@
 
 起動・出典・検証は [README-JA.txt](README-JA.txt) と
 [REAL_COURSE_NOTES.md](REAL_COURSE_NOTES.md) を参照してください。
+
+現地写真照合・建物編集の使い方：[SURVEY_MODE.md](SURVEY_MODE.md)

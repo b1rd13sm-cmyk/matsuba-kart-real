@@ -21,7 +21,7 @@ export function buildBuildingTile(THREE,tile,sharedMaterial,boxGeometry,detailMa
   const color=new THREE.Color();
   function triangle(out,cs,a,b,c,shade){out.push(...a,...b,...c);color.set(shade);for(let i=0;i<3;i++)cs.push(color.r,color.g,color.b)}
   function triangleBoth(a,b,c,shade,totalHeight){triangle(positions,colors,a,b,c,shade);triangle(lowPositions,lowColors,...[a,b,c].map(p=>[p[0],p[1]>.1?totalHeight:p[1],p[2]]),shade)}
-  function fitting(kind,x,y,z,w,h,d,rotation){if(!detail.has(kind))detail.set(kind,[]);detail.get(kind).push({x,y,z,w,h,d,rotation})}
+  function fitting(kind,x,y,z,w,h,d,rotation,tint=null){if(!detail.has(kind))detail.set(kind,[]);detail.get(kind).push({x,y,z,w,h,d,rotation,tint})}
   function routeDistance(p){let best=Infinity;for(let i=0;i<route.length;i+=4){const q=route[i];best=Math.min(best,Math.hypot(p[0]-q[0],p[1]-q[1]))}return best}
   for(const b of tile.buildings){
     const h=b.eaveHeight??b.height,pts=b.p;
@@ -41,7 +41,7 @@ export function buildBuildingTile(THREE,tile,sharedMaterial,boxGeometry,detailMa
         const midpoint=[(a[0]+q[0])/2,(a[1]+q[1])/2],dist=routeDistance(midpoint);
         if(!front||i===b.frontEdge)front={midpoint,dist,nx,nz,theta,length};
         const cols=Math.min(b.style==='institution'?8:5,Math.max(1,Math.floor(length/3.0)));
-        const rows=b.style==='outbuilding'?0:Math.max(1,Math.min(8,b.levels??Math.floor((h-1)/2.8)));
+        const rows=b.features?.some(f=>f.kind==='window')?0:b.style==='outbuilding'?0:Math.max(1,Math.min(8,b.levels??Math.floor((h-1)/2.8)));
         for(let row=0;row<rows;row++)for(let k=0;k<cols;k++){
           const f=(k+1)/(cols+1),x=a[0]+dx*f+nx*.075,z=a[1]+dz*f+nz*.075,y=1.7+row*2.8;
           if(y+.75>=h)continue;
@@ -50,12 +50,13 @@ export function buildBuildingTile(THREE,tile,sharedMaterial,boxGeometry,detailMa
         }
       }
     }
-    if(front&&b.style!=='outbuilding'&&b.siteUse!=='school'){
+    if(front&&!b.features?.some(f=>f.kind==='door')&&b.style!=='outbuilding'&&b.siteUse!=='school'){
       const {midpoint:p,nx,nz,theta,length}=front;
       fitting('door',p[0]+nx*.06,1.12,p[1]+nz*.06,b.style==='institution'?1.8:1.05,2.12,.09,theta);
       // Deeper canopies/balconies are added only where there is facade clearance.
       if(front.dist>9&&length>5)fitting('canopy',p[0]+nx*.35,2.38,p[1]+nz*.35,1.75,.14,.7,theta);
     }
+    for(const feature of b.features||[]){const kind={window:'glass',door:'door',sign:'canopy',fence:'frame',parking:'balcony',plant:'canopy'}[feature.kind];if(kind)fitting(kind,feature.x,feature.y,feature.z,feature.width,feature.height,feature.depth,-(feature.rotation||0)*Math.PI/180,feature.color||null)}
     const vectors=pts.map(p=>new THREE.Vector2(...p)),holes=b.holes.map(r=>r.map(p=>new THREE.Vector2(...p)));
     const flat=[...pts,...b.holes.flat()];
     for(const tri of THREE.ShapeUtils.triangulateShape(vectors,holes)){
@@ -82,6 +83,10 @@ export function buildBuildingTile(THREE,tile,sharedMaterial,boxGeometry,detailMa
         triangle(positions,colors,a,c,ridge[far],gable?wall:roof);
         if(near!==far)triangle(positions,colors,a,ridge[far],ridge[near],roof);
       }
+    }else if(b.roofShape==='shed'){
+      let longest=0,nx=1,nz=0;for(let i=0;i<pts.length;i++){const a=pts[i],q=pts[(i+1)%pts.length],length=Math.hypot(q[0]-a[0],q[1]-a[1]);if(length>longest){longest=length;nx=-(q[1]-a[1])/length;nz=(q[0]-a[0])/length}}const values=pts.map(p=>p[0]*nx+p[1]*nz),min=Math.min(...values),range=Math.max(...values)-min||1,elevate=p=>[p[0],h+(b.roofRise||0)*(p[0]*nx+p[1]*nz-min)/range,p[1]];
+      for(const tri of THREE.ShapeUtils.triangulateShape(vectors,holes))triangle(positions,colors,...tri.map(i=>elevate(flat[i])),roof);
+      for(const ring of [pts,...b.holes])for(let i=0;i<ring.length;i++){const a=ring[i],q=ring[(i+1)%ring.length];triangle(positions,colors,[a[0],h,a[1]],[q[0],h,q[1]],elevate(a),wall);triangle(positions,colors,[q[0],h,q[1]],elevate(q),elevate(a),wall)}
     }else if(b.roofShape==='gabled'){
       // Pitch complex real footprints without replacing them with rectangles.
       // Split each roof triangle at the ridge so concave outlines stay intact.
@@ -109,8 +114,11 @@ export function buildBuildingTile(THREE,tile,sharedMaterial,boxGeometry,detailMa
   near.userData.buildingCount=far.userData.buildingCount=tile.buildings.length;
   for(const [kind,items] of detail){
     const m=new THREE.InstancedMesh(boxGeometry,detailMaterials[kind],items.length),o=new THREE.Object3D();
-    items.forEach((d,i)=>{o.position.set(d.x,d.y,d.z);o.rotation.set(0,d.rotation,0);o.scale.set(d.w,d.h,d.d);o.updateMatrix();m.setMatrixAt(i,o.matrix)});
-    m.instanceMatrix.needsUpdate=true;m.computeBoundingSphere();details.add(m);
+    items.forEach((d,i)=>{o.position.set(d.x,d.y,d.z);o.rotation.set(0,d.rotation,0);o.scale.set(d.w,d.h,d.d);o.updateMatrix();m.setMatrixAt(i,o.matrix);if(d.tint)m.setColorAt(i,new THREE.Color(d.tint))});
+    m.instanceMatrix.needsUpdate=true;if(m.instanceColor)m.instanceColor.needsUpdate=true;m.computeBoundingSphere();details.add(m);
+  }
+  for(const b of tile.buildings)for(const f of b.features||[])if(f.kind==='sign'&&f.text&&typeof document!=='undefined'){
+    const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128;const context=canvas.getContext('2d');context.fillStyle=f.color||'#eeeeee';context.fillRect(0,0,512,128);context.fillStyle='#14212b';context.font='bold 48px sans-serif';context.textAlign='center';context.fillText(String(f.text).slice(0,60),256,82,480);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;const material=new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide});const mesh=new THREE.Mesh(new THREE.PlaneGeometry(f.width,f.height),material);mesh.position.set(f.x,f.y,f.z);mesh.rotation.y=-(f.rotation||0)*Math.PI/180;details.add(mesh)
   }
   return {group,near,far,details};
 }

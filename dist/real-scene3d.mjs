@@ -11,7 +11,7 @@ const canvas=document.createElement('canvas');
 canvas.className='gamecanvas';canvas.style.zIndex='0';
 document.body.insertBefore(canvas,document.querySelector('#canvas'));
 try {
-  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance',preserveDrawingBuffer:!!window.KART_SURVEY});
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.25));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -191,9 +191,17 @@ try {
   }
   function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
   addEventListener('resize',resize);resize();
+  let surveyCamera=null;
+  if(window.KART_SURVEY)window.kartSurveyScene={
+    camera(value){surveyCamera=value;return surveyCamera},
+    capture(){renderer.render(scene,camera);return canvas.toDataURL('image/png')},
+    refresh(){for(const tile of buildingTiles){if(tile.meshes){world.remove(tile.meshes.group);tile.meshes.group.traverse(o=>{if(o.geometry&&o.geometry!==sharedBox)o.geometry.dispose();if(o.material?.map){o.material.map.dispose();o.material.dispose()}})}}buildingTiles.splice(0,buildingTiles.length,...prepareBuildingTiles(map.buildings));for(const tile of buildingTiles){const [x0,z0,x1,z1]=tile.bounds;tile.sphere=new THREE.Sphere(new THREE.Vector3(...frame.worldPoint((x0+x1)/2,(z0+z1)/2,tile.height/2)),Math.hypot((x1-x0)*frame.eastScale/2,(z1-z0)*frame.northScale/2,tile.height/2))}stats.loadedTiles=0},
+    groundPoint(clientX,clientY){const ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2(clientX/innerWidth*2-1,1-clientY/innerHeight*2),camera);const point=new THREE.Vector3();if(!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),point))return null;return [point.x/frame.eastScale,-point.z/frame.northScale]}
+  };
   window.renderKartScene=(me)=>{
     const fx=Math.cos(me.camera),fz=Math.sin(me.camera);
     camera.position.set(...frame.worldPoint(me.x-fx*5.5,me.y-fz*5.5,3.65));camera.lookAt(...frame.worldPoint(me.x+fx*22,me.y+fz*22,1.4));
+    if(surveyCamera){const c=surveyCamera,h=c.heading*Math.PI/180,p=c.pitch*Math.PI/180;camera.position.set(...frame.worldPoint(c.x,c.y,c.height));camera.lookAt(...frame.worldPoint(c.x+Math.sin(h)*Math.cos(p)*100,c.y+Math.cos(h)*Math.cos(p)*100,c.height+Math.sin(p)*100));camera.fov=c.fov;camera.updateProjectionMatrix()}else if(camera.fov!==74){camera.fov=74;camera.updateProjectionMatrix()}
     updateKarts(me);updatePlaceLabel(me);
     const started=performance.now();updateBuildings();renderer.render(scene,camera);stats.calls=renderer.info.render.calls;stats.triangles=renderer.info.render.triangles;stats.frameMs=performance.now()-started;
   };

@@ -8,6 +8,7 @@ when upstream highway connectivity changes. All 73 route node IDs are checked.
 import argparse, collections, gzip, hashlib, json, math, pathlib
 import xml.etree.ElementTree as ET
 import mapbox_vector_tile
+from survey_overrides import apply_survey
 from shapely import make_valid, normalize, set_precision
 from shapely.geometry import LineString, Point, Polygon, box
 from shapely.ops import unary_union
@@ -30,7 +31,7 @@ def number(s):
 
 def main():
     cli=argparse.ArgumentParser(description=__doc__);cli.add_argument('source',type=pathlib.Path)
-    cli.add_argument('--gsi',type=pathlib.Path,default=ROOT/'dist/data/gsi-tiles');args=cli.parse_args()
+    cli.add_argument('--gsi',type=pathlib.Path,default=ROOT/'dist/data/gsi-tiles');cli.add_argument('--survey',type=pathlib.Path,help='Exported matsuba-survey.json; edits survive source regeneration');args=cli.parse_args()
     circuit=json.loads((ROOT/'dist/data/course-route.json').read_text())
     origin=circuit['origin'];lat,lon=origin['lat'],origin['lon'];mlon=111320*math.cos(math.radians(lat))
     route=circuit['route'];route_line=LineString(route+[route[0]])
@@ -193,6 +194,10 @@ def main():
             'roofShape':roof,'roofShapeEstimated':'roof:shape' not in t,'wallColor':override.get('wallColor') or t.get('building:colour') or t.get('building:color'),
             'roofColor':override.get('roofColor') or t.get('roof:colour') or t.get('roof:color'),'appearanceEstimated':True,'seed':seed,
             'area':round(area,2),'routeDistance':round(p.distance(route_line),2),'centroid':[round(p.centroid.x,2),round(p.centroid.y,2)]})
+    missing=set(overrides)-{b['id'] for b in buildings}
+    if missing:raise RuntimeError('Reviewed building IDs missing: '+str(sorted(missing)))
+    buildings,records=apply_survey(buildings,records,roads,route,args.survey)
+    footprint_union=unary_union([rec[1] for rec in records]);occupied=footprint_union.buffer(.12,join_style=2)
     surfaces={}
     secondary=unary_union([LineString(road['p']).buffer(road['width']/2,join_style=2) for road in roads])
     race_surface=race_line.buffer(4.4,join_style=2)

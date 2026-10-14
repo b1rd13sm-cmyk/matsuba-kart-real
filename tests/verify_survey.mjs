@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {project,unproject,applyOverride,validateRing,validateRecord,checkCollisions} from '../dist/survey-core.mjs';
+const map=JSON.parse(fs.readFileSync(new URL('../dist/data/real-hachiman.json',import.meta.url))),b=map.buildings.find(b=>b.id==='gsi/38549eb19a63f49c');
+const geo=unproject(map.origin,...b.centroid);const p=project(map.origin,geo.lat,geo.lon);assert(Math.hypot(p[0]-b.centroid[0],p[1]-b.centroid[1])<1e-8);
+const edit={height:10,levels:3,roofShape:'shed',wallColor:'#e1d9bf',roofColor:'#687e8f',quality:{status:'edited'}};const result=applyOverride(b,edit);assert.equal(result.height,10);assert.equal(result.eaveHeight+result.roofRise,10);assert.deepEqual(result.p,b.p);assert.equal(b.height,9.5);
+assert.throws(()=>validateRing([[0,0],[10,10],[0,10],[10,0]]));assert.throws(()=>applyOverride(b,{height:NaN}));assert.throws(()=>validateRecord({schemaVersion:1,overrides:{missing:edit},locations:[]},map.buildings));
+checkCollisions(result,map);assert.throws(()=>checkCollisions({...result,p:[[170,-65],[180,-65],[180,-55],[170,-55]]},map));
+fs.writeFileSync('/workspace/verification/survey-test-export.json',JSON.stringify({schemaVersion:1,overrides:{[b.id]:edit},locations:[{id:'school-front',camera:{x:0,y:0,height:1.6,heading:0,pitch:0,fov:60}}]}));
+console.log('PASS: shared coordinates, solid height/roof edits, source preservation, invalid shape and road intrusion rejection, missing-ID rejection.');
