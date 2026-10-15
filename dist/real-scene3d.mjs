@@ -19,7 +19,7 @@ try {
   const scene=new THREE.Scene();scene.background=new THREE.Color('#b8d6e6');
   scene.fog=new THREE.Fog('#c6d7d8',240,740);
   const world=new THREE.Group();world.scale.set(frame.eastScale,1,-frame.northScale);scene.add(world);
-  const camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.65,760);
+  const chaseCamera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.65,760),aerialCamera=new THREE.OrthographicCamera(-100,100,100,-100,.65,760);let camera=chaseCamera;
   const ambient=new THREE.HemisphereLight('#edf4fa','#a2a9af',1.5);world.add(ambient);
   const sun=new THREE.DirectionalLight('#ffffff',1.15);sun.position.set(-95,190,80);world.add(sun);
   const material=(color,roughness=1)=>new THREE.MeshLambertMaterial({color,side:THREE.DoubleSide});
@@ -119,7 +119,7 @@ try {
   }
   const namedBuildings=map.buildings.filter(b=>b.name&&b.routeDistance<100);
   let nextLabel=0;
-  function updatePlaceLabel(me){if(performance.now()<nextLabel)return;nextLabel=performance.now()+300;let closest=null,distance=60;for(const b of namedBuildings){let d=Infinity;for(let i=0;i<b.p.length;i++){const a=b.p[i],q=b.p[(i+1)%b.p.length],dx=q[0]-a[0],dy=q[1]-a[1],u=Math.max(0,Math.min(1,((me.x-a[0])*dx+(me.y-a[1])*dy)/(dx*dx+dy*dy||1)));d=Math.min(d,Math.hypot(me.x-a[0]-dx*u,me.y-a[1]-dy*u))}if(d<distance){distance=d;closest=b}}document.querySelector('#district').textContent='八幡学区 REAL'+(closest?' · '+closest.name.replace('近江八幡市立',''):'')}
+  function updatePlaceLabel(me){if(performance.now()<nextLabel)return;nextLabel=performance.now()+300;let cue=null,cueDistance=Infinity;for(const l of map.landmarks||[]){const d=Math.hypot(me.x-l.anchor[0],me.y-l.anchor[1]);if(d<(l.cueRadiusMeters||40)&&d<cueDistance){cue=l;cueDistance=d}}if(cue){document.querySelector('#district').textContent=cue.name;return}let closest=null,distance=60;for(const b of namedBuildings){let d=Infinity;for(let i=0;i<b.p.length;i++){const a=b.p[i],q=b.p[(i+1)%b.p.length],dx=q[0]-a[0],dy=q[1]-a[1],u=Math.max(0,Math.min(1,((me.x-a[0])*dx+(me.y-a[1])*dy)/(dx*dx+dy*dy||1)));d=Math.min(d,Math.hypot(me.x-a[0]-dx*u,me.y-a[1]-dy*u))}if(d<distance){distance=d;closest=b}}document.querySelector('#district').textContent='八幡学区 REAL'+(closest?' · '+closest.name.replace('近江八幡市立',''):'')}
   function raceDistance(p){let best=Infinity;for(let i=0;i<map.route.length;i+=4){const q=map.route[i];best=Math.min(best,Math.hypot(p[0]-q[0],p[1]-q[1]))}return best}
   function placement(out,x,y,z,wide,high,deep,rotation){out.push({x,y,z,wide,high,deep,rotation})}
   function instances(items,mat){if(!items.length)return;
@@ -199,10 +199,10 @@ try {
     groundPoint(clientX,clientY){const ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2(clientX/innerWidth*2-1,1-clientY/innerHeight*2),camera);const point=new THREE.Vector3();if(!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),point))return null;return [point.x/frame.eastScale,-point.z/frame.northScale]}
   };
   window.renderKartScene=(me)=>{
-    const fx=Math.cos(me.camera),fz=Math.sin(me.camera);
+    camera=surveyCamera?.projection==='orthographic'?aerialCamera:chaseCamera;camera.up.set(0,1,0);const fx=Math.cos(me.camera),fz=Math.sin(me.camera);
     camera.position.set(...frame.worldPoint(me.x-fx*5.5,me.y-fz*5.5,3.65));camera.lookAt(...frame.worldPoint(me.x+fx*22,me.y+fz*22,1.4));
-    if(surveyCamera){const c=surveyCamera,h=c.heading*Math.PI/180,p=c.pitch*Math.PI/180;camera.position.set(...frame.worldPoint(c.x,c.y,c.height));camera.lookAt(...frame.worldPoint(c.x+Math.sin(h)*Math.cos(p)*100,c.y+Math.cos(h)*Math.cos(p)*100,c.height+Math.sin(p)*100));camera.fov=c.fov;camera.updateProjectionMatrix()}else if(camera.fov!==74){camera.fov=74;camera.updateProjectionMatrix()}
-    updateKarts(me);updatePlaceLabel(me);
+    if(surveyCamera){const c=surveyCamera,h=c.heading*Math.PI/180,p=c.pitch*Math.PI/180;camera.position.set(...frame.worldPoint(c.x,c.y,c.height));if(Math.abs(c.pitch)>=89.9)camera.up.set(Math.sin(h),0,-Math.cos(h));camera.lookAt(...frame.worldPoint(c.x+Math.sin(h)*Math.cos(p)*100,c.y+Math.cos(h)*Math.cos(p)*100,c.height+Math.sin(p)*100));if(camera.isOrthographicCamera){const half=(c.spanMeters||200)/2;camera.left=-half*innerWidth/innerHeight;camera.right=-camera.left;camera.top=half;camera.bottom=-half}else camera.fov=c.fov;camera.updateProjectionMatrix()}else if(camera.fov!==74){camera.fov=74;camera.updateProjectionMatrix()}
+    updateKarts(me);updatePlaceLabel(surveyCamera?{x:surveyCamera.x,y:surveyCamera.y}:me);
     const started=performance.now();updateBuildings();renderer.render(scene,camera);stats.calls=renderer.info.render.calls;stats.triangles=renderer.info.render.triangles;stats.frameMs=performance.now()-started;
   };
 } catch(error){console.warn('REAL 3D unavailable; using the 2D course renderer.',error);canvas.remove()}

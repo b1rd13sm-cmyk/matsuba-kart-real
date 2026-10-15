@@ -38,10 +38,12 @@ def apply_survey(buildings, records, roads, route, path):
         if 'type' in e:
             uses={'apartments':('apartments','dormitory','terrace'),'institution':('school','university','public','civic','hospital'),'commercial':('retail','commercial','industrial','warehouse'),'outbuilding':('garage','garages','shed','roof'),'house':('house','detached','residential')}
             b['style']=next((style for style,kinds in uses.items() if b['type'] in kinds),b['style'])
-        features=e.get('features',[])
+        features=e.get('features',b.get('features',[]))
         if len(features)>100:raise ValueError('Too many features')
         for f in features:
-            if f.get('kind') not in ('window','door','sign','fence','parking','plant') or any(not isinstance(f.get(k),(float,int)) or not math.isfinite(f[k]) for k in ('x','y','z','width','height','depth')) or not 0<min(f['width'],f['height'],f['depth']) or max(f['width'],f['height'],f['depth'])>100:raise ValueError('Invalid feature')
+            if f.get('kind') not in ('window','door','sign','fence','parking','plant','tower') or any(not isinstance(f.get(k),(float,int)) or not math.isfinite(f[k]) for k in ('x','y','z','width','height','depth')) or not 0<min(f['width'],f['height'],f['depth']) or max(f['width'],f['height'],f['depth'])>100:raise ValueError('Invalid feature')
+        for f in features:
+            if f.get('kind')=='tower' and (not isinstance(f.get('roofRise',.8),(int,float)) or not math.isfinite(f.get('roofRise',.8)) or not 0<=f.get('roofRise',.8)<=20 or (f.get('roofColor') and not re.fullmatch(r'#[0-9a-fA-F]{6}',f['roofColor']))):raise ValueError('Invalid tower roof')
         quality=e.get('quality',{})
         if (quality.get('status')=='reviewed' or any(quality.get(k) in ('matched','approximate') for k in ('position','shape','color'))) and (not quality.get('reference',{}).get('source') or not quality.get('note') or quality.get('reference',{}).get('type')=='test'):raise ValueError('Verified survey needs reference and review note')
         b.update(p=[[round(x,2),round(y,2)] for x,y in list(p.exterior.coords)[:-1]],holes=[[[round(x,2),round(y,2)] for x,y in list(h.coords)[:-1]] for h in p.interiors],centroid=[round(p.centroid.x,2),round(p.centroid.y,2)],features=features,survey=quality,appearanceEstimated=True,heightMeasured=False,area=round(p.area,2),routeDistance=round(p.distance(line),2))

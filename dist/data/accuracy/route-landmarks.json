@@ -1,0 +1,352 @@
+{
+  "version": 1,
+  "origin": {
+    "lat": 35.13838,
+    "lon": 136.09886
+  },
+  "reviewDate": "2026-10-15",
+  "termsNote": "Source links only; no copyrighted photo pixels distributed. GSI aerial comparison follows PDL1.0 attribution.",
+  "landmarks": [
+    {
+      "id": "school-front",
+      "name": "八幡中学校前",
+      "buildingId": "gsi/38549eb19a63f49c",
+      "kind": "facility",
+      "priority": 1,
+      "anchor": [
+        173.89,
+        -61.77
+      ],
+      "routeMeters": 0,
+      "camera": {
+        "x": 145,
+        "y": -19,
+        "height": 1.6,
+        "heading": 290,
+        "pitch": 0,
+        "fov": 60,
+        "projection": "perspective"
+      },
+      "cameraEvidence": "Approximate facade direction from footprint/photo; camera position, lens and EXIF not verified",
+      "position": {
+        "lat": 35.1386164,
+        "lon": 136.0982701
+      },
+      "sources": [
+        {
+          "url": "https://www.fureai-cloud.jp/hachiman-jh/home/index/annai/yoran",
+          "type": "official-page",
+          "viewedAt": "2026-10-15",
+          "captureDate": null
+        }
+      ],
+      "observed": [
+        "校舎の中庭側の一翼は3段の窓、明るい壁、青灰色の傾斜屋根"
+      ],
+      "unverified": [
+        "校舎全翼・実測高さ・窓位置・門の細部",
+        "学校案内の撮影位置は不明。登録カメラは道路側の比較用"
+      ],
+      "quality": {
+        "status": "partially-reviewed",
+        "position": "source-polygon",
+        "shape": "partial",
+        "color": "photo-guided",
+        "height": "estimated"
+      },
+      "cueRadiusMeters": 48
+    },
+    {
+      "id": "vories-main",
+      "name": "近江兄弟社中学校・学園本館前",
+      "buildingId": "247999560",
+      "kind": "facility",
+      "priority": 2,
+      "anchor": [
+        -333.81,
+        335.49
+      ],
+      "routeMeters": 807.6,
+      "camera": {
+        "x": -333.81,
+        "y": 335.49,
+        "height": 3.5,
+        "heading": 146.565,
+        "pitch": 9,
+        "fov": 75,
+        "projection": "perspective"
+      },
+      "cameraEvidence": "On mapped race road, facing approximate official front-facade direction. Source-photo position/lens not known; source polygons and inferred entrance component retained. Stored comparison is near game driving-camera height (3.5m); original photo camera height is unknown.",
+      "position": {
+        "lat": 35.1411312,
+        "lon": 136.0953857
+      },
+      "sources": [
+        {
+          "url": "https://www.vories.ac.jp/facilities/honkan-jhs/",
+          "type": "official-page",
+          "viewedAt": "2026-10-15",
+          "captureDate": null
+        }
+      ],
+      "observed": [
+        "公式説明で5階、5階は礼拝堂",
+        "明るい上部外壁、濃いレンガ基壇、正面中央のアーチ状ガラス",
+        "正面の低い入口突出部（公式外観写真）"
+      ],
+      "unverified": [
+        "実測高さ、正確な色値、背面、屋根端部、入口アーチの寸法",
+        "前面の隣接ポリゴンの同定と高さ。削除せず維持したため下部外壁に遮蔽あり",
+        "前面ポリゴン445902866との対応・高さ4.3mは推定"
+      ],
+      "quality": {
+        "status": "partially-reviewed",
+        "position": "source-polygon",
+        "shape": "partial",
+        "color": "photo-guided",
+        "height": "estimated"
+      },
+      "cueRadiusMeters": 48,
+      "relatedBuildingIds": [
+        "445902866"
+      ]
+    },
+    {
+      "id": "vories-hope",
+      "name": "ヴォーリズ学園希望館前",
+      "buildingId": "247999559",
+      "kind": "facility",
+      "priority": 3,
+      "anchor": [
+        -378.51,
+        308.65
+      ],
+      "routeMeters": 859.7,
+      "camera": {
+        "x": -397,
+        "y": 238,
+        "height": 1.6,
+        "heading": 68,
+        "pitch": 4,
+        "fov": 60,
+        "projection": "perspective"
+      },
+      "cameraEvidence": "Approximate facade direction from footprint/photo; camera position, lens and EXIF not verified",
+      "position": {
+        "lat": 35.1407103,
+        "lon": 136.0950264
+      },
+      "sources": [
+        {
+          "url": "https://www.vories.ac.jp/facilities/kiboukan/",
+          "type": "official-page",
+          "viewedAt": "2026-10-15",
+          "captureDate": null
+        }
+      ],
+      "observed": [
+        "公式説明で4階",
+        "クリーム系外壁と橙茶系の屋根、低い入口棟"
+      ],
+      "unverified": [
+        "低い入口棟の別立体化、レンガ部分、実測高さ、屋根結合"
+      ],
+      "quality": {
+        "status": "partially-reviewed",
+        "position": "source-polygon",
+        "shape": "partial",
+        "color": "photo-guided",
+        "height": "estimated"
+      },
+      "cueRadiusMeters": 48
+    },
+    {
+      "id": "hakuunkan",
+      "name": "白雲館前",
+      "buildingId": "386119860",
+      "kind": "facility",
+      "priority": 4,
+      "anchor": [
+        -730.58,
+        135.09
+      ],
+      "routeMeters": 1253.1,
+      "camera": {
+        "x": -744,
+        "y": 151,
+        "height": 1.6,
+        "heading": 143,
+        "pitch": 5,
+        "fov": 60,
+        "projection": "perspective"
+      },
+      "cameraEvidence": "Approximate facade direction from footprint/photo; camera position, lens and EXIF not verified",
+      "position": {
+        "lat": 35.1394139,
+        "lon": 136.0909425
+      },
+      "sources": [
+        {
+          "url": "https://www.biwako-visitors.jp/uploads/doc/pamphlet/43008c2efea0b5e08b43de206e4f92e57bd5c4e485b26d576b9945aa560c388c.pdf",
+          "type": "official-page",
+          "viewedAt": "2026-10-15",
+          "captureDate": null
+        }
+      ],
+      "observed": [
+        "木造2階建て、寄棟、太鼓楼、総高12.60m（公式パンフレット）",
+        "白系外壁、灰色屋根"
+      ],
+      "unverified": [
+        "OSM面積460.47㎡と公開建築面積305.85㎡の相違",
+        "本体軒高、太鼓楼寸法・位置、附属部分、色値"
+      ],
+      "quality": {
+        "status": "partially-reviewed",
+        "position": "source-polygon-area-discrepancy",
+        "shape": "partial",
+        "color": "photo-guided",
+        "height": "overall-height-published; body-estimated"
+      },
+      "cueRadiusMeters": 48
+    },
+    {
+      "id": "junction-1351622398",
+      "name": "多賀交差点",
+      "kind": "junction",
+      "sourceNodeId": "1351622398",
+      "priority": 5,
+      "anchor": [
+        -244.87,
+        390.12
+      ],
+      "routeMeters": 703.2,
+      "camera": {
+        "x": -244.87,
+        "y": 390.12,
+        "height": 1.6,
+        "heading": 0,
+        "pitch": 0,
+        "fov": 60,
+        "projection": "perspective"
+      },
+      "position": {
+        "lat": 35.1418845,
+        "lon": 136.0961701
+      },
+      "sources": [
+        {
+          "url": "https://www.openstreetmap.org/node/1351622398",
+          "type": "osm-node",
+          "viewedAt": "2026-10-15"
+        }
+      ],
+      "observed": [
+        "OSMの交差点名称・座標のみ"
+      ],
+      "unverified": [
+        "信号機、看板、電柱、外観は未照合"
+      ],
+      "quality": {
+        "status": "map-only",
+        "position": "osm-node",
+        "shape": "unverified",
+        "color": "unverified",
+        "height": "unverified"
+      },
+      "cueRadiusMeters": 35
+    },
+    {
+      "id": "junction-1351620145",
+      "name": "玉木交差点",
+      "kind": "junction",
+      "sourceNodeId": "1351620145",
+      "priority": 5,
+      "anchor": [
+        -997.61,
+        -1.88
+      ],
+      "routeMeters": 1554.1,
+      "camera": {
+        "x": -997.61,
+        "y": -1.88,
+        "height": 1.6,
+        "heading": 0,
+        "pitch": 0,
+        "fov": 60,
+        "projection": "perspective"
+      },
+      "position": {
+        "lat": 35.1383631,
+        "lon": 136.0879013
+      },
+      "sources": [
+        {
+          "url": "https://www.openstreetmap.org/node/1351620145",
+          "type": "osm-node",
+          "viewedAt": "2026-10-15"
+        }
+      ],
+      "observed": [
+        "OSMの交差点名称・座標のみ"
+      ],
+      "unverified": [
+        "信号機、看板、電柱、外観は未照合"
+      ],
+      "quality": {
+        "status": "map-only",
+        "position": "osm-node",
+        "shape": "unverified",
+        "color": "unverified",
+        "height": "unverified"
+      },
+      "cueRadiusMeters": 35
+    },
+    {
+      "id": "junction-1351618360",
+      "name": "小幡上筋交差点",
+      "kind": "junction",
+      "sourceNodeId": "1351618360",
+      "priority": 5,
+      "anchor": [
+        -787.97,
+        -323.25
+      ],
+      "routeMeters": 1937.9,
+      "camera": {
+        "x": -787.97,
+        "y": -323.25,
+        "height": 1.6,
+        "heading": 0,
+        "pitch": 0,
+        "fov": 60,
+        "projection": "perspective"
+      },
+      "position": {
+        "lat": 35.1354762,
+        "lon": 136.0902042
+      },
+      "sources": [
+        {
+          "url": "https://www.openstreetmap.org/node/1351618360",
+          "type": "osm-node",
+          "viewedAt": "2026-10-15"
+        }
+      ],
+      "observed": [
+        "OSMの交差点名称・座標のみ"
+      ],
+      "unverified": [
+        "信号機、看板、電柱、外観は未照合"
+      ],
+      "quality": {
+        "status": "map-only",
+        "position": "osm-node",
+        "shape": "unverified",
+        "color": "unverified",
+        "height": "unverified"
+      },
+      "cueRadiusMeters": 35
+    }
+  ]
+}

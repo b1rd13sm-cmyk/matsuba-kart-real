@@ -1,5 +1,5 @@
 {
-  "reviewDate": "2026-10-14",
+  "reviewDate": "2026-10-15",
   "aerial": {
     "provider": "国土地理院 全国最新写真（シームレス）",
     "url": "https://maps.gsi.go.jp/#17/35.13838/136.09886/&base=seamlessphoto",
@@ -21,5 +21,17 @@
       "RGB colors and window dimensions are estimates",
       "No school photo is republished as a texture"
     ]
+  },
+  "landmarkReview": {
+    "catalogue": "accuracy/route-landmarks.json",
+    "newExteriorOverrides": [
+      "386119860",
+      "247999560",
+      "247999559",
+      "445902866"
+    ],
+    "copyright": "Official photos/PDF viewed for research only; not redistributed or used as textures. Source links retained. No Street View images fetched.",
+    "aerialDates": "GSI seamlessphoto capture dates unknown; visible mosaic seams and temporal differences.",
+    "limits": "Photo-guided RGB and model proportions are estimates. Hakuunkan published total height is 12.60m; OSM footprint discrepancy unresolved. School courtyard photo is not a geolocated street view. Adjacent main-building entrance polygon identity and 4.3m height are inferred from the official entrance photo and aerial alignment."
   }
 }

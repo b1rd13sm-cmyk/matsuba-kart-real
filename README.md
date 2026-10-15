@@ -7,3 +7,5 @@
 [REAL_COURSE_NOTES.md](REAL_COURSE_NOTES.md) を参照してください。
 
 現地写真照合・建物編集の使い方：[SURVEY_MODE.md](SURVEY_MODE.md)
+
+目印の再現・原資料・変更前後画像：[LANDMARK_REVIEW_REPORT.md](LANDMARK_REVIEW_REPORT.md)

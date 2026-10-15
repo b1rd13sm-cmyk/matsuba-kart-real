@@ -1,0 +1,229 @@
+{
+  "comparison": "Identical stored camera before/after; source-photo pose/FOV not calibrated",
+  "results": [
+    {
+      "id": "school-front",
+      "stage": "before",
+      "camera": {
+        "x": 145,
+        "y": -19,
+        "height": 1.6,
+        "heading": 290,
+        "pitch": 0,
+        "fov": 60,
+        "projection": "perspective"
+      },
+      "viewport": [
+        1100,
+        750
+      ],
+      "stats": {
+        "totalBuildings": 8557,
+        "loadedTiles": 50,
+        "visibleBuildings": 839,
+        "visibleTiles": 22,
+        "detailTiles": 4,
+        "calls": 182,
+        "triangles": 59664,
+        "frameMs": 41.09999999962747
+      },
+      "errors": []
+    },
+    {
+      "id": "vories-main",
+      "stage": "before",
+      "camera": {
+        "x": -333.81,
+        "y": 335.49,
+        "height": 3.5,
+        "heading": 146.565,
+        "pitch": 9,
+        "fov": 75,
+        "projection": "perspective"
+      },
+      "viewport": [
+        1100,
+        750
+      ],
+      "stats": {
+        "totalBuildings": 8557,
+        "loadedTiles": 80,
+        "visibleBuildings": 1515,
+        "visibleTiles": 35,
+        "detailTiles": 5,
+        "calls": 164,
+        "triangles": 144018,
+        "frameMs": 18.59999999962747
+      },
+      "errors": []
+    },
+    {
+      "id": "vories-hope",
+      "stage": "before",
+      "camera": {
+        "x": -397,
+        "y": 238,
+        "height": 1.6,
+        "heading": 68,
+        "pitch": 4,
+        "fov": 60,
+        "projection": "perspective"
+      },
+      "viewport": [
+        1100,
+        750
+      ],
+      "stats": {
+        "totalBuildings": 8557,
+        "loadedTiles": 116,
+        "visibleBuildings": 535,
+        "visibleTiles": 21,
+        "detailTiles": 4,
+        "calls": 117,
+        "triangles": 123242,
+        "frameMs": 19.800000000745058
+      },
+      "errors": []
+    },
+    {
+      "id": "hakuunkan",
+      "stage": "before",
+      "camera": {
+        "x": -744,
+        "y": 151,
+        "height": 1.6,
+        "heading": 143,
+        "pitch": 5,
+        "fov": 60,
+        "projection": "perspective"
+      },
+      "viewport": [
+        1100,
+        750
+      ],
+      "stats": {
+        "totalBuildings": 8557,
+        "loadedTiles": 142,
+        "visibleBuildings": 2169,
+        "visibleTiles": 42,
+        "detailTiles": 6,
+        "calls": 183,
+        "triangles": 196383,
+        "frameMs": 19
+      },
+      "errors": []
+    },
+    {
+      "id": "school-front",
+      "stage": "after",
+      "camera": {
+        "x": 145,
+        "y": -19,
+        "height": 1.6,
+        "heading": 290,
+        "pitch": 0,
+        "fov": 60,
+        "projection": "perspective"
+      },
+      "viewport": [
+        1100,
+        750
+      ],
+      "stats": {
+        "totalBuildings": 8557,
+        "loadedTiles": 48,
+        "visibleBuildings": 796,
+        "visibleTiles": 21,
+        "detailTiles": 4,
+        "calls": 181,
+        "triangles": 58998,
+        "frameMs": 16.299999998882413
+      },
+      "errors": []
+    },
+    {
+      "id": "vories-main",
+      "stage": "after",
+      "camera": {
+        "x": -333.81,
+        "y": 335.49,
+        "height": 3.5,
+        "heading": 146.565,
+        "pitch": 9,
+        "fov": 75,
+        "projection": "perspective"
+      },
+      "viewport": [
+        1100,
+        750
+      ],
+      "stats": {
+        "totalBuildings": 8557,
+        "loadedTiles": 76,
+        "visibleBuildings": 1515,
+        "visibleTiles": 35,
+        "detailTiles": 5,
+        "calls": 164,
+        "triangles": 146053,
+        "frameMs": 11.900000000372529
+      },
+      "errors": []
+    },
+    {
+      "id": "vories-hope",
+      "stage": "after",
+      "camera": {
+        "x": -397,
+        "y": 238,
+        "height": 1.6,
+        "heading": 68,
+        "pitch": 4,
+        "fov": 60,
+        "projection": "perspective"
+      },
+      "viewport": [
+        1100,
+        750
+      ],
+      "stats": {
+        "totalBuildings": 8557,
+        "loadedTiles": 104,
+        "visibleBuildings": 535,
+        "visibleTiles": 21,
+        "detailTiles": 4,
+        "calls": 117,
+        "triangles": 125277,
+        "frameMs": 20.699999999254942
+      },
+      "errors": []
+    },
+    {
+      "id": "hakuunkan",
+      "stage": "after",
+      "camera": {
+        "x": -744,
+        "y": 151,
+        "height": 1.6,
+        "heading": 143,
+        "pitch": 5,
+        "fov": 60,
+        "projection": "perspective"
+      },
+      "viewport": [
+        1100,
+        750
+      ],
+      "stats": {
+        "totalBuildings": 8557,
+        "loadedTiles": 128,
+        "visibleBuildings": 2036,
+        "visibleTiles": 39,
+        "detailTiles": 6,
+        "calls": 180,
+        "triangles": 193334,
+        "frameMs": 2.600000001490116
+      },
+      "errors": []
+    }
+  ]
+}

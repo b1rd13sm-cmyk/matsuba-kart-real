@@ -14,6 +14,173 @@
     "wallColor": "#e1d9bf",
     "roofColor": "#687e8f",
     "reviewSource": "https://www.fureai-cloud.jp/hachiman-jh/home/index/annai/yoran",
-    "reviewNote": "Aerial confirms courtyard outline visually; school-guide photo guides only visible wing. Other wings, dimensions and total height remain estimated."
+    "reviewNote": "Aerial confirms courtyard outline visually; school-guide photo guides only visible wing. Other wings, dimensions and total height remain estimated.",
+    "reviewEvidence": {
+      "footprint": "real GSI polygon; school aerial visual check, no survey",
+      "height": "9.5 m remains a three-floor estimate",
+      "levels": "three window rows in school-guide courtyard wing; other wings unverified",
+      "roof": "blue-grey pitched visible wing; complex ridge layout estimated",
+      "appearance": "school-guide visible wing light warm walls; RGB approximate",
+      "windows": "three rows observed; individual positions/dimensions not measured"
+    }
+  },
+  "386119860": {
+    "expectedCentroid": [
+      -720.76,
+      115.09
+    ],
+    "expectedArea": 460.47,
+    "type": "public",
+    "style": "institution",
+    "name": "白雲館",
+    "levels": 2,
+    "levelsSource": "official-guide: wooden two storeys",
+    "height": 9.2,
+    "heightSource": "main-roof-body estimate; overall height 12.60 m officially published",
+    "publishedOverallHeight": 12.6,
+    "roofRise": 2.3,
+    "roofShape": "hipped",
+    "wallColor": "#efece4",
+    "roofColor": "#596168",
+    "reviewSource": "https://www.biwako-visitors.jp/uploads/doc/pamphlet/43008c2efea0b5e08b43de206e4f92e57bd5c4e485b26d576b9945aa560c388c.pdf",
+    "reviewNote": "Official brochure confirms two storeys, hipped roof, overall height 12.60 m and roof tower. Body/eave heights, tower dimensions, RGB values and annex roof junctions are approximations. OSM footprint 460.47 m2 differs from published building area 305.85 m2; source outline retained pending survey.",
+    "reviewEvidence": {
+      "footprint": "OSM polygon retained; area discrepancy with official guide unresolved",
+      "height": "12.60 m overall officially published; body/eaves and tower proportions estimated",
+      "levels": "official guide: two storeys",
+      "roof": "official guide: hipped; exact junctions and slopes unmeasured",
+      "appearance": "official exterior photograph: light plaster, grey roof; RGB estimated",
+      "windows": "photo-guided proportions; procedural placements on unreviewed faces",
+      "entrance": "no invented sign; porch detail unmodelled"
+    },
+    "facade": {
+      "floorPitch": 3.0,
+      "windowBase": 1.65,
+      "maxColumns": 6,
+      "windowSpacing": 3.1
+    },
+    "features": [
+      {
+        "kind": "tower",
+        "x": -720.76,
+        "y": 10.4,
+        "z": 115.09,
+        "width": 3.5,
+        "height": 2.8,
+        "depth": 3.5,
+        "rotation": 29.4,
+        "color": "#eceae1",
+        "roofColor": "#63747b",
+        "roofRise": 0.8,
+        "evidence": "Tower existence and total height documented; placement/proportions are aerial/photo-guided estimates"
+      }
+    ]
+  },
+  "247999560": {
+    "expectedCentroid": [
+      -316.28,
+      306.26
+    ],
+    "expectedArea": 1272.87,
+    "type": "school",
+    "style": "institution",
+    "name": "ヴォーリズ学園本館・近江兄弟社中学校",
+    "levels": 5,
+    "levelsSource": "official facility page: floors 1-5, chapel on fifth",
+    "height": 16.2,
+    "roofRise": 1.4,
+    "roofShape": "gabled",
+    "wallColor": "#ded4bb",
+    "roofColor": "#93634e",
+    "reviewSource": "https://www.vories.ac.jp/facilities/honkan-jhs/",
+    "reviewNote": "Official exterior confirms warm light upper walls, dark brick base and large central arched glazing; official text confirms fifth-floor chapel. Metre heights, RGB colors, ridge/end shape and pane dimensions are estimated; back facades unreviewed.",
+    "reviewEvidence": {
+      "footprint": "OSM outline retained; GSI aerial confirms orientation visually, no survey",
+      "levels": "official text: fifth-floor chapel",
+      "height": "five-floor use-based estimate, not measured",
+      "roof": "pitched brown roof visible; gable/end simplification estimated",
+      "appearance": "official photo: light warm walls and dark brick base; RGB estimated",
+      "windows": "central arch observed on street facade; exact panes/spacing and other faces estimated"
+    },
+    "facade": {
+      "baseBand": {
+        "height": 2.7,
+        "color": "#594a43"
+      },
+      "proceduralWindows": true,
+      "floorPitch": 2.9,
+      "maxColumns": 9,
+      "windowSpacing": 4.4
+    },
+    "features": [
+      {
+        "kind": "window",
+        "shape": "arch",
+        "x": -322.43,
+        "y": 9.9,
+        "z": 318.55,
+        "width": 4.4,
+        "height": 9.3,
+        "depth": 0.05,
+        "rotation": 26.571,
+        "color": "#30465e",
+        "evidence": "Observed centre arch; position/dimensions approximate"
+      }
+    ]
+  },
+  "247999559": {
+    "expectedCentroid": [
+      -348.99,
+      259.41
+    ],
+    "expectedArea": 1156.72,
+    "type": "school",
+    "style": "institution",
+    "name": "ヴォーリズ学園希望館",
+    "levels": 4,
+    "levelsSource": "official facility page: four storeys",
+    "height": 12.4,
+    "roofRise": 1.2,
+    "roofShape": "gabled",
+    "wallColor": "#e2d1aa",
+    "roofColor": "#a87554",
+    "reviewSource": "https://www.vories.ac.jp/facilities/kiboukan/",
+    "reviewNote": "Official exterior confirms warm cream walls, brown brick infill, four-storey main wing and low pitched orange-tile entrance wing. RGB and metre heights estimated. Low entrance wing is not separately massed yet; do not treat whole-complex gable as exact.",
+    "reviewEvidence": {
+      "footprint": "OSM footprint retained; aerial orientation visually checked",
+      "levels": "official floor descriptions: four",
+      "height": "four-storey estimate, not measured",
+      "roof": "orange/brown pitched portions observed; whole-complex roof shape simplified",
+      "appearance": "official photo: cream walls; RGB approximate; brick infill and low entrance wing pending",
+      "entrance": "low entrance wing/arcade observed, not yet separately modelled"
+    }
+  },
+  "445902866": {
+    "expectedCentroid": [
+      -329.1,
+      325.14
+    ],
+    "expectedArea": 243.18,
+    "type": "school",
+    "style": "institution",
+    "name": "学園本館 前面低層部",
+    "levels": 1,
+    "levelsSource": "one-storey entrance projection visible in official main-building exterior; polygon association inferred",
+    "height": 4.3,
+    "heightSource": "entrance-height estimate; exact dimension and polygon association unmeasured",
+    "roofShape": "flat",
+    "roofRise": 0,
+    "wallColor": "#ded4bb",
+    "roofColor": "#6b6961",
+    "reviewSource": "https://www.vories.ac.jp/facilities/honkan-jhs/",
+    "reviewNote": "Official exterior shows a low entrance projection. This adjacent mapped polygon is associated using frontage position and aerial; the association and 4.3m height are estimates, not a survey. Source polygon is retained. Default 7.6m/2-storey unknown mass previously hid the documented five-storey facade.",
+    "reviewEvidence": {
+      "footprint": "source polygon retained; entrance-component correspondence inferred from adjacency/aerial",
+      "levels": "low ground entrance visible in official photo; polygon correspondence inferred",
+      "height": "4.3m estimate, not measured",
+      "roof": "low entrance roof visually guided; flat simplified",
+      "appearance": "associated main-building light wall palette; colour is photo-guided estimate",
+      "windows": "procedural detail, not individually verified"
+    }
   }
 }

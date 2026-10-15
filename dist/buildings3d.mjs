@@ -6,7 +6,7 @@ export function prepareBuildingTiles(buildings, size=128) {
   for(const building of buildings){
     const [x,z]=building.centroid,key=`${Math.floor(x/size)},${Math.floor(z/size)}`;
     if(!tiles.has(key))tiles.set(key,{key,buildings:[],bounds:[Infinity,Infinity,-Infinity,-Infinity],height:0});
-    const tile=tiles.get(key);tile.buildings.push(building);tile.height=Math.max(tile.height,building.height+2);
+    const tile=tiles.get(key);tile.buildings.push(building);tile.height=Math.max(tile.height,building.height+2,...(building.features||[]).map(f=>f.y+f.height/2+(f.roofRise||0)+2));
     for(const p of building.p){tile.bounds[0]=Math.min(tile.bounds[0],p[0]);tile.bounds[1]=Math.min(tile.bounds[1],p[1]);tile.bounds[2]=Math.max(tile.bounds[2],p[0]);tile.bounds[3]=Math.max(tile.bounds[3],p[1])}
   }
   return [...tiles.values()];
@@ -32,16 +32,17 @@ export function buildBuildingTile(THREE,tile,sharedMaterial,boxGeometry,detailMa
         const a=ring[i],q=ring[(i+1)%ring.length],dx=q[0]-a[0],dz=q[1]-a[1],length=Math.hypot(dx,dz);
         if(length<.02)continue;
         const baseA=[a[0],.06,a[1]],baseB=[q[0],.06,q[1]],topA=[a[0],h,a[1]],topB=[q[0],h,q[1]];
-        triangleBoth(baseA,baseB,topA,wall,b.height);triangleBoth(baseB,topB,topA,wall,b.height);
+        const band=b.facade?.baseBand;
+        if(band&&band.height<h){const splitA=[a[0],band.height,a[1]],splitB=[q[0],band.height,q[1]];triangle(positions,colors,baseA,baseB,splitA,band.color);triangle(positions,colors,baseB,splitB,splitA,band.color);triangle(lowPositions,lowColors,baseA,baseB,splitA,band.color);triangle(lowPositions,lowColors,baseB,splitB,splitA,band.color);triangle(positions,colors,splitA,splitB,topA,wall);triangle(positions,colors,splitB,topB,topA,wall);triangle(lowPositions,lowColors,splitA,splitB,[a[0],b.height,a[1]],wall);triangle(lowPositions,lowColors,splitB,[q[0],b.height,q[1]],[a[0],b.height,a[1]],wall)}else{triangleBoth(baseA,baseB,topA,wall,b.height);triangleBoth(baseB,topB,topA,wall,b.height)}
         if(b.routeDistance>150||ri>0||length<3)continue;
         // Ring winding determines outward normal; this is independent of tile order.
         const nx=dz/length*orientation,nz=-dx/length*orientation,theta=-Math.atan2(dz,dx);
         const midpoint=[(a[0]+q[0])/2,(a[1]+q[1])/2],dist=routeDistance(midpoint);
         if(!front||i===b.frontEdge)front={midpoint,dist,nx,nz,theta,length};
-        const cols=Math.min(b.style==='institution'?8:5,Math.max(1,Math.floor(length/3.0)));
-        const rows=b.features?.some(f=>f.kind==='window')?0:b.style==='outbuilding'?0:Math.max(1,Math.min(8,b.levels??Math.floor((h-1)/2.8)));
+        const cols=Math.min(b.facade?.maxColumns||(b.style==='institution'?8:5),Math.max(1,Math.floor(length/(b.facade?.windowSpacing||3.0))));
+        const rows=(!b.facade?.proceduralWindows&&b.features?.some(f=>f.kind==='window'))?0:b.style==='outbuilding'?0:Math.max(1,Math.min(8,b.levels??Math.floor((h-1)/2.8)));
         for(let row=0;row<rows;row++)for(let k=0;k<cols;k++){
-          const f=(k+1)/(cols+1),x=a[0]+dx*f+nx*.075,z=a[1]+dz*f+nz*.075,y=1.7+row*2.8;
+          const f=(k+1)/(cols+1),x=a[0]+dx*f+nx*.075,z=a[1]+dz*f+nz*.075,y=(b.facade?.windowBase||1.7)+row*(b.facade?.floorPitch||2.8);
           if(y+.75>=h)continue;
           fitting('frame',x,y,z,b.type==='school'?2.15:1.20,1.32,.08,theta);fitting('glass',x+nx*.04,y,z+ nz*.04,b.type==='school'?1.96:1.0,1.10,.05,theta);
           if(b.style==='apartments'&&row>0&&dist>9)fitting('balcony',x+nx*.3,y-.8,z+nz*.3,1.55,.14,.55,theta);
@@ -54,7 +55,17 @@ export function buildBuildingTile(THREE,tile,sharedMaterial,boxGeometry,detailMa
       // Deeper canopies/balconies are added only where there is facade clearance.
       if(front.dist>9&&length>5)fitting('canopy',p[0]+nx*.35,2.38,p[1]+nz*.35,1.75,.14,.7,theta);
     }
-    for(const feature of b.features||[]){const kind={window:'glass',door:'door',sign:'canopy',fence:'frame',parking:'balcony',plant:'canopy'}[feature.kind];if(kind)fitting(kind,feature.x,feature.y,feature.z,feature.width,feature.height,feature.depth,-(feature.rotation||0)*Math.PI/180,feature.color||null)}
+    function landmarkTriangle(a,c,d,shade){triangle(positions,colors,a,c,d,shade);triangle(lowPositions,lowColors,a,c,d,shade)}
+    for(const f of b.features||[])if(f.kind==='tower'){
+      const angle=(f.rotation||0)*Math.PI/180,c=Math.cos(angle),sn=Math.sin(angle),point=(x,y,z)=>[f.x+x*c-z*sn,y,f.z+x*sn+z*c],bottom=f.y-f.height/2,top=f.y+f.height/2;
+      const ring=[[-f.width/2,-f.depth/2],[f.width/2,-f.depth/2],[f.width/2,f.depth/2],[-f.width/2,f.depth/2]],peak=point(0,top+(f.roofRise||.8),0);
+      for(let i=0;i<4;i++){const a=ring[i],q=ring[(i+1)%4],ba=point(a[0],bottom,a[1]),bq=point(q[0],bottom,q[1]),ta=point(a[0],top,a[1]),tq=point(q[0],top,q[1]);landmarkTriangle(ba,bq,ta,f.color||wall);landmarkTriangle(bq,tq,ta,f.color||wall);landmarkTriangle(ta,tq,peak,f.roofColor||roof)}
+    }
+    for(const f of b.features||[])if(f.kind==='window'&&f.shape==='arch'){
+      const angle=(f.rotation||0)*Math.PI/180,point=(x,y)=>[f.x+x*Math.cos(angle),y,f.z+x*Math.sin(angle)],r=f.width/2,base=f.y-f.height/2,spring=f.y+f.height/2-r;
+      const outline=[point(-r,base),point(r,base)];for(let i=0;i<=8;i++){const a=i*Math.PI/8;outline.push(point(Math.cos(a)*r,spring+Math.sin(a)*r))}for(let i=1;i<outline.length-1;i++)landmarkTriangle(outline[0],outline[i],outline[i+1],f.color||'#304d66');
+    }
+    for(const feature of b.features||[]){if(feature.shape==='arch')continue;const kind={window:'glass',door:'door',sign:'canopy',fence:'frame',parking:'balcony',plant:'canopy'}[feature.kind];if(kind)fitting(kind,feature.x,feature.y,feature.z,feature.width,feature.height,feature.depth,-(feature.rotation||0)*Math.PI/180,feature.color||null)}
     const vectors=pts.map(p=>new THREE.Vector2(...p)),holes=b.holes.map(r=>r.map(p=>new THREE.Vector2(...p)));
     const flat=[...pts,...b.holes.flat()];
     for(const tri of THREE.ShapeUtils.triangulateShape(vectors,holes)){
@@ -81,6 +92,14 @@ export function buildBuildingTile(THREE,tile,sharedMaterial,boxGeometry,detailMa
         triangle(positions,colors,a,c,ridge[far],gable?wall:roof);
         if(near!==far)triangle(positions,colors,a,ridge[far],ridge[near],roof);
       }
+    }else if(b.roofShape==='hipped'){
+      // Four clipped roof planes, retaining the source outline/holes. Complex
+      // annex junctions are an approximation, not a surveyed roof skeleton.
+      let direction=[1,0],longest=0;for(let i=0;i<pts.length;i++){const a=pts[i],q=pts[(i+1)%pts.length],l=Math.hypot(q[0]-a[0],q[1]-a[1]);if(l>longest){longest=l;direction=[(q[0]-a[0])/l,(q[1]-a[1])/l]}}
+      const u=p=>p[0]*direction[0]+p[1]*direction[1],v=p=>-p[0]*direction[1]+p[1]*direction[0],us=pts.map(u),vs=pts.map(v),u0=Math.min(...us),u1=Math.max(...us),v0=Math.min(...vs),v1=Math.max(...vs),slope=(b.roofRise||1.2)/(Math.min(u1-u0,v1-v0)/2||1),planes=[p=>(u(p)-u0)*slope,p=>(u1-u(p))*slope,p=>(v(p)-v0)*slope,p=>(v1-v(p))*slope],lift=p=>[p[0],h+Math.max(0,Math.min(...planes.map(fn=>fn(p)))),p[1]];
+      function clipPlane(poly,fn){const out=[];for(let i=0;i<poly.length;i++){const a=poly[i],q=poly[(i+1)%poly.length],fa=fn(a),fq=fn(q);if(fa<=1e-8)out.push(a);if((fa<0&&fq>0)||(fa>0&&fq<0)){const t=fa/(fa-fq);out.push([a[0]+(q[0]-a[0])*t,a[1]+(q[1]-a[1])*t])}}return out}
+      for(const tri of THREE.ShapeUtils.triangulateShape(vectors,holes))for(let i=0;i<4;i++){let poly=tri.map(k=>flat[k]);for(let j=0;j<4&&poly.length;j++)if(i!==j)poly=clipPlane(poly,p=>planes[i](p)-planes[j](p));for(let k=1;k<poly.length-1;k++)triangle(positions,colors,lift(poly[0]),lift(poly[k]),lift(poly[k+1]),roof)}
+      for(const ring of [pts,...b.holes])for(let i=0;i<ring.length;i++){const a=ring[i],q=ring[(i+1)%ring.length],cuts=[0,1];for(let j=0;j<4;j++)for(let k=j+1;k<4;k++){const fa=planes[j](a)-planes[k](a),fq=planes[j](q)-planes[k](q);if(fa*fq<0)cuts.push(fa/(fa-fq))}cuts.sort((a,b)=>a-b);for(let j=1;j<cuts.length;j++){const p=[a[0]+(q[0]-a[0])*cuts[j-1],a[1]+(q[1]-a[1])*cuts[j-1]],r=[a[0]+(q[0]-a[0])*cuts[j],a[1]+(q[1]-a[1])*cuts[j]];triangle(positions,colors,[p[0],h,p[1]],[r[0],h,r[1]],lift(p),wall);triangle(positions,colors,[r[0],h,r[1]],lift(r),lift(p),wall)}}
     }else if(b.roofShape==='shed'){
       let longest=0,nx=1,nz=0;for(let i=0;i<pts.length;i++){const a=pts[i],q=pts[(i+1)%pts.length],length=Math.hypot(q[0]-a[0],q[1]-a[1]);if(length>longest){longest=length;nx=-(q[1]-a[1])/length;nz=(q[0]-a[0])/length}}const values=pts.map(p=>p[0]*nx+p[1]*nz),min=Math.min(...values),range=Math.max(...values)-min||1,elevate=p=>[p[0],h+(b.roofRise||0)*(p[0]*nx+p[1]*nz-min)/range,p[1]];
       for(const tri of THREE.ShapeUtils.triangulateShape(vectors,holes))triangle(positions,colors,...tri.map(i=>elevate(flat[i])),roof);
